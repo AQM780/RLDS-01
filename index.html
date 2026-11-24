@@ -2,13 +2,464 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RLDS-01 | Rendimientos Línea de Siembra</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RLDS-01 | Rendimientos Línea de Siembra</title>
+
+<style>
+:root {
+    --green: #0F6D3F;
+    --green-light: #18A558;
+    --green-bg: #EAF7F0;
+    --gray: #D7D3C7;
+    --text: #26352D;
+    --muted: #78847C;
+    --white: #FFFFFF;
+    --background: #F5F7F5;
+    --border: #E7ECE8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+header {
+    background: var(--green);
+    color: white;
+    padding: 20px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.brand-icon {
+    background: white;
+    color: var(--green);
+    width: 43px;
+    height: 43px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 23px;
+    font-weight: bold;
+}
+
+.brand h1 {
+    font-size: 24px;
+    letter-spacing: 1px;
+}
+
+.brand p {
+    font-size: 11px;
+    opacity: .85;
+    margin-top: 4px;
+    letter-spacing: 1px;
+}
+
+.header-info {
+    text-align: right;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+main {
+    max-width: 1400px;
+    margin: auto;
+    padding: 30px 5%;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.page-heading h2 {
+    font-size: 23px;
+}
+
+.page-heading p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.status {
+    background: #FFF4DD;
+    color: #946A17;
+    border-radius: 20px;
+    padding: 9px 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status::before {
+    content: "● ";
+}
+
+.section-title {
+    font-size: 15px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.025);
+}
+
+.metric-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: bold;
+    letter-spacing: .5px;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--green);
+    margin: 15px 0 7px;
+}
+
+.metric-description {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.card-heading h3 {
+    font-size: 15px;
+}
+
+.tag {
+    background: var(--green-bg);
+    color: var(--green);
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 15px;
+}
+
+.chart-area {
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--muted);
+    text-align: center;
+    gap: 12px;
+    border: 1px dashed var(--gray);
+    border-radius: 9px;
+    font-size: 12px;
+}
+
+.chart-icon {
+    font-size: 34px;
+    color: var(--green-light);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row span:first-child {
+    color: var(--muted);
+}
+
+.info-row strong {
+    color: var(--text);
+}
+
+.device-status {
+    color: #A16D12 !important;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 500px;
+}
+
+th {
+    text-align: left;
+    color: var(--muted);
+    font-weight: bold;
+    padding: 13px;
+    background: #F7F9F7;
+}
+
+td {
+    padding: 15px 13px;
+    border-top: 1px solid var(--border);
+}
+
+.empty-row {
+    text-align: center;
+    color: var(--muted);
+    padding: 35px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+@media(max-width: 950px) {
+    .metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 550px) {
+    header {
+        padding: 17px 5%;
+    }
+    .header-info {
+        text-align: left;
+    }
+    main {
+        padding: 23px 4%;
+    }
+    .metrics {
+        gap: 10px;
+    }
+    .card {
+        padding: 15px;
+    }
+    .metric-value {
+        font-size: 25px;
+    }
+}
+</style>
 </head>
+
 <body>
-    <h1>RLDS-01</h1>
-    <h2>Rendimientos Línea de Siembra</h2>
-    <p>Plataforma de monitoreo de producción Ellepot.</p>
+
+<header>
+    <div class="brand">
+        <div class="brand-icon">R</div>
+        <div>
+            <h1>RLDS-01</h1>
+            <p>RENDIMIENTOS LÍNEA DE SIEMBRA</p>
+        </div>
+    </div>
+
+    <div class="header-info">
+        <div id="current-date">Fecha</div>
+        <div id="current-time">Hora</div>
+    </div>
+</header>
+
+<main>
+
+    <section class="page-heading">
+        <div>
+            <h2>Panel de producción</h2>
+            <p>Monitoreo y seguimiento del rendimiento operativo</p>
+        </div>
+        <div class="status">Esperando conexión ESP32</div>
+    </section>
+
+    <h3 class="section-title">Indicadores de producción</h3>
+
+    <section class="metrics">
+
+        <div class="card">
+            <div class="metric-label">BANDEJAS HOY</div>
+            <div class="metric-value">0</div>
+            <div class="metric-description">Producción acumulada diaria</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">BANDEJAS / HORA</div>
+            <div class="metric-value">0</div>
+            <div class="metric-description">Rendimiento promedio</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">TIEMPO OPERATIVO</div>
+            <div class="metric-value">00:00</div>
+            <div class="metric-description">Tiempo registrado de operación</div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">ÚLTIMO CONTEO</div>
+            <div class="metric-value">--:--</div>
+            <div class="metric-description">Hora de última bandeja</div>
+        </div>
+
+    </section>
+
+    <section class="content-grid">
+
+        <div class="card">
+            <div class="card-heading">
+                <h3>Producción por hora</h3>
+                <span class="tag">Jornada actual</span>
+            </div>
+
+            <div class="chart-area">
+                <div class="chart-icon">▥</div>
+                <strong>Sin registros de producción</strong>
+                <span>El gráfico aparecerá cuando conectemos la base de datos.</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-heading">
+                <h3>Información operativa</h3>
+                <span class="tag">Prototipo</span>
+            </div>
+
+            <div class="info-row">
+                <span>Colaborador</span>
+                <strong>001</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Línea de siembra</span>
+                <strong>01</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Dispositivo</span>
+                <strong>RLDS-01</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Estado ESP32</span>
+                <strong class="device-status">Desconectado</strong>
+            </div>
+
+            <div class="info-row">
+                <span>Sensor</span>
+                <strong>HC-SR04</strong>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="card">
+        <div class="card-heading">
+            <h3>Últimos registros de producción</h3>
+            <span class="tag">Historial diario</span>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>FECHA</th>
+                        <th>HORA</th>
+                        <th>DISPOSITIVO</th>
+                        <th>BANDEJAS</th>
+                        <th>COLABORADOR</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="empty-row">
+                            No hay registros disponibles.
+                            <br><br>
+                            Pendiente de conexión con Supabase.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    RLDS-01 · Sistema de monitoreo de rendimiento
+    <br><br>
+    Prototipo V1.0 · Flores El Capiro
+</footer>
+
+<script>
+function updateClock() {
+    const now = new Date();
+
+    document.getElementById("current-date").textContent =
+        now.toLocaleDateString("es-CO", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+
+    document.getElementById("current-time").textContent =
+        now.toLocaleTimeString("es-CO");
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+
 </body>
 </html>
