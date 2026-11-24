@@ -2,464 +2,384 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RLDS-01 | Rendimientos Línea de Siembra</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RLDS-01 | Línea de Siembra</title>
 
-<style>
-:root {
-    --green: #0F6D3F;
-    --green-light: #18A558;
-    --green-bg: #EAF7F0;
-    --gray: #D7D3C7;
-    --text: #26352D;
-    --muted: #78847C;
-    --white: #FFFFFF;
-    --background: #F5F7F5;
-    --border: #E7ECE8;
-}
+  <!-- Librería para generar archivos Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--background);
-    color: var(--text);
-}
-
-header {
-    background: var(--green);
-    color: white;
-    padding: 20px 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-}
-
-.brand-icon {
-    background: white;
-    color: var(--green);
-    width: 43px;
-    height: 43px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    font-size: 23px;
-    font-weight: bold;
-}
-
-.brand h1 {
-    font-size: 24px;
-    letter-spacing: 1px;
-}
-
-.brand p {
-    font-size: 11px;
-    opacity: .85;
-    margin-top: 4px;
-    letter-spacing: 1px;
-}
-
-.header-info {
-    text-align: right;
-    font-size: 12px;
-    line-height: 1.7;
-}
-
-main {
-    max-width: 1400px;
-    margin: auto;
-    padding: 30px 5%;
-}
-
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.page-heading h2 {
-    font-size: 23px;
-}
-
-.page-heading p {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 6px;
-}
-
-.status {
-    background: #FFF4DD;
-    color: #946A17;
-    border-radius: 20px;
-    padding: 9px 15px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.status::before {
-    content: "● ";
-}
-
-.section-title {
-    font-size: 15px;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.metrics {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
-}
-
-.card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 22px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.025);
-}
-
-.metric-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: bold;
-    letter-spacing: .5px;
-}
-
-.metric-value {
-    font-size: 32px;
-    font-weight: bold;
-    color: var(--green);
-    margin: 15px 0 7px;
-}
-
-.metric-description {
-    font-size: 11px;
-    color: var(--muted);
-}
-
-.content-grid {
-    display: grid;
-    grid-template-columns: 1.7fr 1fr;
-    gap: 18px;
-    margin-bottom: 22px;
-}
-
-.card-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 22px;
-}
-
-.card-heading h3 {
-    font-size: 15px;
-}
-
-.tag {
-    background: var(--green-bg);
-    color: var(--green);
-    font-size: 10px;
-    padding: 6px 10px;
-    border-radius: 15px;
-}
-
-.chart-area {
-    height: 220px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: var(--muted);
-    text-align: center;
-    gap: 12px;
-    border: 1px dashed var(--gray);
-    border-radius: 9px;
-    font-size: 12px;
-}
-
-.chart-icon {
-    font-size: 34px;
-    color: var(--green-light);
-}
-
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-}
-
-.info-row:last-child {
-    border-bottom: none;
-}
-
-.info-row span:first-child {
-    color: var(--muted);
-}
-
-.info-row strong {
-    color: var(--text);
-}
-
-.device-status {
-    color: #A16D12 !important;
-}
-
-.table-container {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    min-width: 500px;
-}
-
-th {
-    text-align: left;
-    color: var(--muted);
-    font-weight: bold;
-    padding: 13px;
-    background: #F7F9F7;
-}
-
-td {
-    padding: 15px 13px;
-    border-top: 1px solid var(--border);
-}
-
-.empty-row {
-    text-align: center;
-    color: var(--muted);
-    padding: 35px;
-}
-
-footer {
-    text-align: center;
-    padding: 25px;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-@media(max-width: 950px) {
-    .metrics {
-        grid-template-columns: repeat(2, 1fr);
+  <style>
+    :root {
+      --verde: #0F6D3F;
+      --verde-claro: #18A558;
+      --fondo: #EAF7F0;
+      --blanco: #FFFFFF;
+      --texto: #26352D;
     }
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-}
 
-@media(max-width: 550px) {
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #F5F8F6;
+      color: var(--texto);
+      padding: 24px;
+    }
+
+    .contenedor {
+      max-width: 950px;
+      margin: auto;
+    }
+
     header {
-        padding: 17px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 28px;
     }
-    .header-info {
-        text-align: left;
+
+    .marca h1 {
+      color: var(--verde);
+      font-size: 25px;
     }
-    main {
-        padding: 23px 4%;
+
+    .marca p {
+      color: #718078;
+      font-size: 13px;
+      margin-top: 5px;
     }
-    .metrics {
+
+    .estado {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #777;
+    }
+
+    .indicador {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #D99A30;
+    }
+
+    .barra-acciones {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 18px;
+    }
+
+    .btn-excel {
+      background: var(--verde);
+      color: white;
+      border: none;
+      border-radius: 9px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .btn-excel:hover {
+      background: var(--verde-claro);
+    }
+
+    .informacion {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      color: #66736B;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .panel-principal {
+      background: var(--verde);
+      color: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 18px;
+    }
+
+    .panel-principal p {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    .total {
+      font-size: 58px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+
+    .subtitulo {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .indicadores {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .tarjeta {
+      background: white;
+      border: 1px solid #E5EBE7;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .tarjeta p {
+      font-size: 13px;
+      color: #758078;
+      margin-bottom: 12px;
+    }
+
+    .tarjeta h2 {
+      font-size: 28px;
+      color: var(--verde);
+    }
+
+    .dispositivo {
+      background: white;
+      border: 1px solid #E5EBE7;
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .dispositivo h3 {
+      color: var(--verde);
+      font-size: 16px;
+      margin-bottom: 18px;
+    }
+
+    .fila {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid #EEF1EF;
+      font-size: 14px;
+    }
+
+    .fila:last-child {
+      border-bottom: none;
+    }
+
+    .estado-sensor {
+      color: #A77A26;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 11px;
+      color: #929B95;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 16px;
+      }
+
+      header {
+        align-items: flex-start;
+      }
+
+      .total {
+        font-size: 46px;
+      }
+
+      .indicadores {
         gap: 10px;
+      }
+
+      .tarjeta {
+        padding: 16px;
+      }
+
+      .tarjeta h2 {
+        font-size: 24px;
+      }
+
+      .btn-excel {
+        width: 100%;
+        justify-content: center;
+      }
     }
-    .card {
-        padding: 15px;
-    }
-    .metric-value {
-        font-size: 25px;
-    }
-}
-</style>
+  </style>
 </head>
 
 <body>
+  <div class="contenedor">
 
-<header>
-    <div class="brand">
-        <div class="brand-icon">R</div>
-        <div>
-            <h1>RLDS-01</h1>
-            <p>RENDIMIENTOS LÍNEA DE SIEMBRA</p>
-        </div>
+    <header>
+      <div class="marca">
+        <h1>RLDS-01</h1>
+        <p>Rendimiento Línea de Siembra</p>
+      </div>
+
+      <div class="estado">
+        <span class="indicador"></span>
+        <span>Esperando ESP32</span>
+      </div>
+    </header>
+
+    <div class="barra-acciones">
+      <button class="btn-excel" onclick="descargarExcel()">
+        <span>▤</span>
+        Descargar Excel
+        <span>↓</span>
+      </button>
     </div>
 
-    <div class="header-info">
-        <div id="current-date">Fecha</div>
-        <div id="current-time">Hora</div>
+    <div class="informacion">
+      <span>Colaborador: 001</span>
+      <span>Línea: 01</span>
+      <span>Dispositivo: RLDS-01</span>
     </div>
-</header>
 
-<main>
-
-    <section class="page-heading">
-        <div>
-            <h2>Panel de producción</h2>
-            <p>Monitoreo y seguimiento del rendimiento operativo</p>
-        </div>
-        <div class="status">Esperando conexión ESP32</div>
+    <section class="panel-principal">
+      <p>BANDEJAS CONTABILIZADAS HOY</p>
+      <div class="total" id="totalBandejas">0</div>
+      <span class="subtitulo">Producción acumulada del día</span>
     </section>
 
-    <h3 class="section-title">Indicadores de producción</h3>
+    <section class="indicadores">
+      <div class="tarjeta">
+        <p>Bandejas / hora</p>
+        <h2 id="bandejasHora">0</h2>
+      </div>
 
-    <section class="metrics">
-
-        <div class="card">
-            <div class="metric-label">BANDEJAS HOY</div>
-            <div class="metric-value">0</div>
-            <div class="metric-description">Producción acumulada diaria</div>
-        </div>
-
-        <div class="card">
-            <div class="metric-label">BANDEJAS / HORA</div>
-            <div class="metric-value">0</div>
-            <div class="metric-description">Rendimiento promedio</div>
-        </div>
-
-        <div class="card">
-            <div class="metric-label">TIEMPO OPERATIVO</div>
-            <div class="metric-value">00:00</div>
-            <div class="metric-description">Tiempo registrado de operación</div>
-        </div>
-
-        <div class="card">
-            <div class="metric-label">ÚLTIMO CONTEO</div>
-            <div class="metric-value">--:--</div>
-            <div class="metric-description">Hora de última bandeja</div>
-        </div>
-
+      <div class="tarjeta">
+        <p>Último conteo</p>
+        <h2 id="ultimoConteo">--:--</h2>
+      </div>
     </section>
 
-    <section class="content-grid">
+    <section class="dispositivo">
+      <h3>Estado del dispositivo</h3>
 
-        <div class="card">
-            <div class="card-heading">
-                <h3>Producción por hora</h3>
-                <span class="tag">Jornada actual</span>
-            </div>
+      <div class="fila">
+        <span>ESP32</span>
+        <span class="estado-sensor">Sin conexión</span>
+      </div>
 
-            <div class="chart-area">
-                <div class="chart-icon">▥</div>
-                <strong>Sin registros de producción</strong>
-                <span>El gráfico aparecerá cuando conectemos la base de datos.</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-heading">
-                <h3>Información operativa</h3>
-                <span class="tag">Prototipo</span>
-            </div>
-
-            <div class="info-row">
-                <span>Colaborador</span>
-                <strong>001</strong>
-            </div>
-
-            <div class="info-row">
-                <span>Línea de siembra</span>
-                <strong>01</strong>
-            </div>
-
-            <div class="info-row">
-                <span>Dispositivo</span>
-                <strong>RLDS-01</strong>
-            </div>
-
-            <div class="info-row">
-                <span>Estado ESP32</span>
-                <strong class="device-status">Desconectado</strong>
-            </div>
-
-            <div class="info-row">
-                <span>Sensor</span>
-                <strong>HC-SR04</strong>
-            </div>
-        </div>
-
+      <div class="fila">
+        <span>Sensor HC-SR04</span>
+        <span class="estado-sensor">Esperando</span>
+      </div>
     </section>
 
-    <section class="card">
-        <div class="card-heading">
-            <h3>Últimos registros de producción</h3>
-            <span class="tag">Historial diario</span>
-        </div>
+    <footer>
+      FLORES EL CAPIRO · SISTEMA DE MEDICIÓN RLDS-01
+    </footer>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>FECHA</th>
-                        <th>HORA</th>
-                        <th>DISPOSITIVO</th>
-                        <th>BANDEJAS</th>
-                        <th>COLABORADOR</th>
-                    </tr>
-                </thead>
+  </div>
 
-                <tbody>
-                    <tr>
-                        <td colspan="5" class="empty-row">
-                            No hay registros disponibles.
-                            <br><br>
-                            Pendiente de conexión con Supabase.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
+  <script>
+    // Historial de registros.
+    // Posteriormente se alimentará desde Supabase.
 
-</main>
+    let registros = [];
 
-<footer>
-    RLDS-01 · Sistema de monitoreo de rendimiento
-    <br><br>
-    Prototipo V1.0 · Flores El Capiro
-</footer>
+    function descargarExcel() {
 
-<script>
-function updateClock() {
-    const now = new Date();
+      if (typeof XLSX === "undefined") {
+        alert("No fue posible cargar la herramienta de Excel. Verifica tu conexión a internet.");
+        return;
+      }
 
-    document.getElementById("current-date").textContent =
-        now.toLocaleDateString("es-CO", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        });
+      const fechaDescarga = new Date();
+      const fechaTexto = fechaDescarga.toLocaleDateString("es-CO");
 
-    document.getElementById("current-time").textContent =
-        now.toLocaleTimeString("es-CO");
-}
+      // Hoja 1: Resumen
+      const resumen = [
+        ["RLDS-01 - RENDIMIENTO LÍNEA DE SIEMBRA"],
+        ["Fecha de descarga", fechaTexto],
+        ["Colaborador", "001"],
+        ["Línea", "01"],
+        ["Dispositivo", "RLDS-01"],
+        [],
+        ["INDICADOR", "VALOR"],
+        ["Bandejas contabilizadas", registros.length],
+        ["Registros almacenados", registros.length]
+      ];
 
-updateClock();
-setInterval(updateClock, 1000);
-</script>
+      const hojaResumen = XLSX.utils.aoa_to_sheet(resumen);
+
+      hojaResumen["!cols"] = [
+        { wch: 32 },
+        { wch: 24 }
+      ];
+
+      // Hoja 2: Historial
+      const historial = registros.map(registro => ({
+        "Fecha": registro.fecha,
+        "Hora": registro.hora,
+        "Colaborador": registro.colaborador,
+        "Línea": registro.linea,
+        "Dispositivo": registro.dispositivo,
+        "Bandejas": registro.bandejas
+      }));
+
+      const hojaHistorial = XLSX.utils.json_to_sheet(historial, {
+        header: [
+          "Fecha",
+          "Hora",
+          "Colaborador",
+          "Línea",
+          "Dispositivo",
+          "Bandejas"
+        ]
+      });
+
+      hojaHistorial["!cols"] = [
+        { wch: 15 },
+        { wch: 12 },
+        { wch: 18 },
+        { wch: 12 },
+        { wch: 18 },
+        { wch: 14 }
+      ];
+
+      // Crear libro Excel
+      const libro = XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(
+        libro,
+        hojaResumen,
+        "Resumen"
+      );
+
+      XLSX.utils.book_append_sheet(
+        libro,
+        hojaHistorial,
+        "Historial"
+      );
+
+      const nombreArchivo =
+        "RLDS-01_Produccion_" +
+        fechaDescarga.toISOString().slice(0, 10) +
+        ".xlsx";
+
+      XLSX.writeFile(libro, nombreArchivo);
+    }
+  </script>
 
 </body>
 </html>
