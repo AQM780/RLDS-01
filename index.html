@@ -102,6 +102,11 @@ header {
   font-size: 12px;
 }
 
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
 .btn-excel {
   background: var(--verde);
   color: white;
@@ -110,7 +115,6 @@ header {
   padding: 10px 15px;
   font-size: 12px;
   font-weight: bold;
-  cursor: pointer;
 }
 
 .btn-excel:hover {
@@ -120,6 +124,80 @@ header {
 .btn-excel:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.filtros {
+  background: white;
+  border: 1px solid #E5EBE7;
+  border-radius: 12px;
+  padding: 17px 20px;
+  margin-bottom: 14px;
+}
+
+.filtros h3 {
+  color: var(--verde);
+  font-size: 14px;
+  margin-bottom: 13px;
+}
+
+.campos-filtro {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.campo label {
+  display: block;
+  font-size: 11px;
+  color: #758078;
+  margin-bottom: 6px;
+}
+
+.campo input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #D7E0DA;
+  border-radius: 7px;
+  color: var(--texto);
+  font-size: 12px;
+}
+
+.btn-consultar,
+.btn-limpiar,
+.btn-reset {
+  border: none;
+  border-radius: 7px;
+  padding: 10px 13px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.btn-consultar {
+  background: var(--verde);
+  color: white;
+}
+
+.btn-limpiar {
+  background: #EAF7F0;
+  color: var(--verde);
+}
+
+.btn-reset {
+  background: #FCEEEE;
+  color: #B42318;
+  border: 1px solid #F3D0D0;
+}
+
+.btn-reset:hover {
+  background: #F9DEDE;
+}
+
+.resumen-filtro {
+  font-size: 11px;
+  color: #758078;
+  margin-top: 12px;
 }
 
 .panel-principal {
@@ -238,7 +316,6 @@ th {
   color: #66736B;
   background: #F4F7F5;
   padding: 10px;
-  font-weight: bold;
 }
 
 td {
@@ -252,13 +329,6 @@ td {
   padding: 18px;
 }
 
-.actualizacion {
-  font-size: 10px;
-  color: #929B95;
-  margin-top: 10px;
-  text-align: right;
-}
-
 .mensaje {
   display: none;
   background: #FDECEC;
@@ -270,6 +340,13 @@ td {
   font-size: 12px;
 }
 
+.actualizacion {
+  font-size: 10px;
+  color: #929B95;
+  margin-top: 10px;
+  text-align: right;
+}
+
 footer {
   text-align: center;
   margin-top: 16px;
@@ -277,9 +354,9 @@ footer {
   font-size: 10px;
 }
 
-@media (min-width: 1200px) and (min-height: 750px) {
-  body {
-    padding-top: 35px;
+@media (max-width: 800px) {
+  .campos-filtro {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -330,18 +407,22 @@ footer {
     grid-template-columns: 1fr;
     gap: 3px;
   }
-
-  .btn-excel {
-    padding: 10px;
-  }
 }
 
-@media (max-width: 370px) {
+@media (max-width: 420px) {
   .barra {
     flex-direction: column;
   }
 
   .btn-excel {
+    width: 100%;
+  }
+
+  .campos-filtro {
+    grid-template-columns: 1fr;
+  }
+
+  .campos-filtro button {
     width: 100%;
   }
 }
@@ -359,7 +440,7 @@ footer {
 
   <div class="estado" id="estadoConexion">
     <span class="indicador"></span>
-    <span id="textoConexion">Conectando con Supabase...</span>
+    <span id="textoConexion">Conectando...</span>
   </div>
 </header>
 
@@ -370,18 +451,55 @@ footer {
     <span>Dispositivo: RLDS-01</span>
   </div>
 
-  <button class="btn-excel" id="btnExcel" onclick="descargarExcel()" disabled>
+  <button class="btn-excel" id="btnExcel"
+    onclick="descargarExcel()" disabled>
     ↓ Descargar Excel
   </button>
 </div>
 
 <div class="mensaje" id="mensajeError"></div>
 
+<!-- FILTROS DE FECHA Y HORA -->
+
+<section class="filtros">
+  <h3>Consultar producción por fecha y hora</h3>
+
+  <div class="campos-filtro">
+
+    <div class="campo">
+      <label for="fechaInicio">Desde</label>
+      <input type="datetime-local" id="fechaInicio">
+    </div>
+
+    <div class="campo">
+      <label for="fechaFin">Hasta</label>
+      <input type="datetime-local" id="fechaFin">
+    </div>
+
+    <button class="btn-consultar" onclick="aplicarFiltros()">
+      Consultar
+    </button>
+
+    <button class="btn-limpiar" onclick="limpiarFiltros()">
+      Limpiar
+    </button>
+
+  </div>
+
+  <div class="resumen-filtro" id="resumenFiltro">
+    Mostrando todos los registros históricos.
+  </div>
+</section>
+
+<!-- PRODUCCIÓN PRINCIPAL -->
+
 <section class="panel-principal">
   <div>
-    <p>BANDEJAS CONTABILIZADAS HOY</p>
+    <p id="tituloTotal">BANDEJAS CONTABILIZADAS HOY</p>
     <div class="total" id="totalBandejas">--</div>
-    <span class="subtitulo">Producción acumulada del día</span>
+    <span class="subtitulo" id="subtituloTotal">
+      Producción acumulada del día
+    </span>
   </div>
 
   <div class="etiqueta">Línea de siembra 01</div>
@@ -390,7 +508,7 @@ footer {
 <section class="indicadores">
 
   <div class="tarjeta">
-    <p>Bandejas / hora</p>
+    <p>Bandejas últimas 60 min</p>
     <h2 id="bandejasHora">--</h2>
   </div>
 
@@ -401,10 +519,31 @@ footer {
 
   <div class="tarjeta">
     <p>Estado de producción</p>
-    <h2 id="estadoProduccion" style="font-size:18px">Consultando...</h2>
+    <h2 id="estadoProduccion" style="font-size:18px">
+      Consultando...
+    </h2>
   </div>
 
 </section>
+
+<!-- REINICIO VISUAL -->
+
+<section class="dispositivo">
+  <h3>Control del conteo</h3>
+
+  <div class="fila">
+    <span>Reiniciar acumulado visual</span>
+    <button class="btn-reset" onclick="reiniciarConteo()">
+      ↻ Reiniciar conteo
+    </button>
+  </div>
+
+  <div class="actualizacion" id="fechaReinicio">
+    No se ha realizado ningún reinicio.
+  </div>
+</section>
+
+<!-- ESTADO DISPOSITIVO -->
 
 <section class="dispositivo">
   <h3>Estado del dispositivo</h3>
@@ -412,15 +551,21 @@ footer {
   <div class="estados">
     <div class="fila">
       <span>Último envío ESP32</span>
-      <span class="estado-sensor" id="estadoESP32">Consultando...</span>
+      <span class="estado-sensor" id="estadoESP32">
+        Consultando...
+      </span>
     </div>
 
     <div class="fila">
       <span>Sensor HC-SR04</span>
-      <span class="estado-sensor" id="estadoSensor">Sin telemetría</span>
+      <span class="estado-sensor" id="estadoSensor">
+        Sin telemetría
+      </span>
     </div>
   </div>
 </section>
+
+<!-- HISTORIAL -->
 
 <section class="historial">
   <h3>Últimos registros de producción</h3>
@@ -437,12 +582,19 @@ footer {
           <th>Turno</th>
         </tr>
       </thead>
+
       <tbody id="tablaRegistros">
         <tr>
-          <td colspan="6" class="vacio">Esperando información...</td>
+          <td colspan="6" class="vacio">
+            Esperando información...
+          </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="actualizacion" id="cantidadRegistros">
+    Registros: 0
   </div>
 
   <div class="actualizacion" id="ultimaActualizacion">
@@ -457,11 +609,13 @@ footer {
 </div>
 
 <script>
+
 // ============================================
-// 1. CONFIGURACIÓN DE SUPABASE
+// 1. CONFIGURACIÓN SUPABASE
 // ============================================
 
-const SUPABASE_URL = "https://bulketzxhvtwlekdnhwc.supabase.co";
+const SUPABASE_URL =
+"https://bulketzxhvtwlekdnhwc.supabase.co";
 
 const SUPABASE_PUBLIC_KEY =
 "sb_publishable_i9vBE9oOj3i093C8iXlXyg_0z-NOGIw";
@@ -471,24 +625,30 @@ const supabaseClient = supabase.createClient(
   SUPABASE_PUBLIC_KEY
 );
 
-// Identificación del dispositivo
 const CODIGO_DISPOSITIVO = "RLDS-01";
 const CODIGO_COLABORADOR = "COL-001";
 const CODIGO_LINEA = "LINEA-01";
 
-// Configuración de actualización
 const INTERVALO_ACTUALIZACION = 10000;
+const TAMANO_PAGINA = 1000;
 
 let registros = [];
 let dispositivo = null;
 let cargando = false;
 
+let filtroActivo = false;
+let fechaDesde = null;
+let fechaHasta = null;
+
+const CLAVE_REINICIO = "rlds01_fecha_reinicio";
+
 
 // ============================================
-// 2. FUNCIONES DE FECHA Y HORA
+// 2. FECHAS Y HORAS
 // ============================================
 
 function fechaLocalColombia(fecha) {
+
   const partes = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Bogota",
     year: "numeric",
@@ -505,16 +665,21 @@ function fechaLocalColombia(fecha) {
   return `${valores.year}-${valores.month}-${valores.day}`;
 }
 
+
 function formatoFecha(fecha) {
+
   return new Intl.DateTimeFormat("es-CO", {
     timeZone: "America/Bogota",
     day: "2-digit",
     month: "2-digit",
     year: "numeric"
   }).format(new Date(fecha));
+
 }
 
+
 function formatoHora(fecha) {
+
   return new Intl.DateTimeFormat("es-CO", {
     timeZone: "America/Bogota",
     hour: "2-digit",
@@ -522,36 +687,101 @@ function formatoHora(fecha) {
     second: "2-digit",
     hour12: true
   }).format(new Date(fecha));
+
 }
 
+
+function formatoFechaHora(fecha) {
+  return formatoFecha(fecha) + " " + formatoHora(fecha);
+}
+
+
 function tiempoTranscurrido(fecha) {
+
   const segundos = Math.max(
     0,
     Math.floor((Date.now() - new Date(fecha).getTime()) / 1000)
   );
 
-  if (segundos < 60) {
-    return `Hace ${segundos} s`;
-  }
+  if (segundos < 60) return `Hace ${segundos} s`;
 
   const minutos = Math.floor(segundos / 60);
 
-  if (minutos < 60) {
-    return `Hace ${minutos} min`;
-  }
+  if (minutos < 60) return `Hace ${minutos} min`;
 
   const horas = Math.floor(minutos / 60);
 
-  if (horas < 24) {
-    return `Hace ${horas} h`;
-  }
+  if (horas < 24) return `Hace ${horas} h`;
 
   return `Hace ${Math.floor(horas / 24)} días`;
+
+}
+
+
+// Convierte fecha local del navegador a ISO para comparar con Supabase
+function convertirFechaISO(valor) {
+
+  if (!valor) return null;
+
+  const fecha = new Date(valor);
+
+  if (isNaN(fecha.getTime())) return null;
+
+  return fecha.toISOString();
+
 }
 
 
 // ============================================
-// 3. CONSULTAR SUPABASE
+// 3. CONSULTAR TODOS LOS REGISTROS
+// ============================================
+
+async function consultarTodosLosRegistros(idDispositivo) {
+
+  let todos = [];
+  let inicio = 0;
+
+  while (true) {
+
+    const fin = inicio + TAMANO_PAGINA - 1;
+
+    const { data, error } = await supabaseClient
+      .from("registros")
+      .select(`
+        fecha_hora,
+        bandejas,
+        turno,
+        id_evento,
+        dispositivo_id,
+        colaborador_id,
+        linea_id
+      `)
+      .eq("dispositivo_id", idDispositivo)
+      .order("fecha_hora", { ascending: true })
+      .range(inicio, fin);
+
+    if (error) {
+      throw error;
+    }
+
+    const pagina = data || [];
+
+    todos = todos.concat(pagina);
+
+    if (pagina.length < TAMANO_PAGINA) {
+      break;
+    }
+
+    inicio += TAMANO_PAGINA;
+  }
+
+  return todos.reverse();
+
+}
+
+
+// ============================================
+// 4. CONSULTAR SUPABASE
 // ============================================
 
 async function consultarDatos() {
@@ -562,7 +792,6 @@ async function consultarDatos() {
 
   try {
 
-    // Buscar el dispositivo RLDS-01
     const { data: datosDispositivo, error: errorDispositivo } =
       await supabaseClient
         .from("dispositivos")
@@ -580,31 +809,12 @@ async function consultarDatos() {
 
     dispositivo = datosDispositivo;
 
-    // Consultar los últimos 5000 registros del dispositivo
-    const { data, error } = await supabaseClient
-      .from("registros")
-      .select(`
-        fecha_hora,
-        bandejas,
-        turno,
-        id_evento,
-        dispositivo_id,
-        colaborador_id,
-        linea_id
-      `)
-      .eq("dispositivo_id", dispositivo.id)
-      .order("fecha_hora", { ascending: false })
-      .limit(5000);
-
-    if (error) {
-      throw error;
-    }
-
-    registros = data || [];
+    registros = await consultarTodosLosRegistros(dispositivo.id);
 
     actualizarPanel();
 
     document.getElementById("estadoConexion").className = "estado ok";
+
     document.getElementById("textoConexion").textContent =
       "Datos actualizados";
 
@@ -621,6 +831,7 @@ async function consultarDatos() {
     console.error("Error consultando Supabase:", error);
 
     document.getElementById("estadoConexion").className = "estado error";
+
     document.getElementById("textoConexion").textContent =
       "Error de consulta";
 
@@ -635,41 +846,202 @@ async function consultarDatos() {
     cargando = false;
 
   }
+
 }
 
 
 // ============================================
-// 4. ACTUALIZAR INDICADORES
+// 5. FILTRAR REGISTROS
+// ============================================
+
+function obtenerRegistrosFiltrados() {
+
+  return registros.filter(r => {
+
+    const fecha = new Date(r.fecha_hora).getTime();
+
+    if (fechaDesde && fecha < fechaDesde.getTime()) {
+      return false;
+    }
+
+    if (fechaHasta && fecha > fechaHasta.getTime()) {
+      return false;
+    }
+
+    return true;
+
+  });
+
+}
+
+
+function aplicarFiltros() {
+
+  const inicio = document.getElementById("fechaInicio").value;
+  const fin = document.getElementById("fechaFin").value;
+
+  fechaDesde = convertirFechaISO(inicio)
+    ? new Date(convertirFechaISO(inicio))
+    : null;
+
+  fechaHasta = convertirFechaISO(fin)
+    ? new Date(convertirFechaISO(fin))
+    : null;
+
+  if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
+
+    alert("La fecha inicial no puede ser posterior a la fecha final.");
+
+    return;
+  }
+
+  filtroActivo = Boolean(fechaDesde || fechaHasta);
+
+  actualizarPanel();
+
+}
+
+
+function limpiarFiltros() {
+
+  document.getElementById("fechaInicio").value = "";
+  document.getElementById("fechaFin").value = "";
+
+  fechaDesde = null;
+  fechaHasta = null;
+  filtroActivo = false;
+
+  actualizarPanel();
+
+}
+
+
+// ============================================
+// 6. REINICIAR CONTEO VISUAL
+// ============================================
+
+function reiniciarConteo() {
+
+  const confirmar = confirm(
+    "¿Deseas reiniciar el acumulado visual del RLDS-01?\n\n" +
+    "Los registros de Supabase NO se eliminarán."
+  );
+
+  if (!confirmar) return;
+
+  const ahora = new Date();
+
+  localStorage.setItem(
+    CLAVE_REINICIO,
+    ahora.toISOString()
+  );
+
+  // Limpiar filtros para comenzar el nuevo conteo visual
+  limpiarFiltros();
+
+  actualizarPanel();
+
+  alert(
+    "Conteo visual reiniciado correctamente.\n" +
+    "El historial de Supabase permanece intacto."
+  );
+
+}
+
+
+function obtenerFechaReinicio() {
+
+  const valor = localStorage.getItem(CLAVE_REINICIO);
+
+  if (!valor) return null;
+
+  const fecha = new Date(valor);
+
+  return isNaN(fecha.getTime()) ? null : fecha;
+
+}
+
+
+// ============================================
+// 7. ACTUALIZAR INDICADORES
 // ============================================
 
 function actualizarPanel() {
 
   const ahora = new Date();
 
-  const fechaHoy = fechaLocalColombia(ahora);
+  const hoy = fechaLocalColombia(ahora);
 
-  const registrosHoy = registros.filter(r =>
-    fechaLocalColombia(new Date(r.fecha_hora)) === fechaHoy
-  );
+  const registrosVista = obtenerRegistrosFiltrados();
 
-  // Total de bandejas del día
-  const totalHoy = registrosHoy.reduce(
-    (suma, r) => suma + Number(r.bandejas || 0),
-    0
-  );
+  const fechaReinicio = obtenerFechaReinicio();
+
+  // El reinicio visual solo afecta los indicadores,
+  // nunca elimina registros del historial.
+
+  let registrosIndicadores = registrosVista;
+
+  if (!filtroActivo && fechaReinicio) {
+
+    registrosIndicadores = registrosIndicadores.filter(r =>
+      new Date(r.fecha_hora) >= fechaReinicio
+    );
+
+  }
+
+  // Total principal
+  let totalPrincipal = 0;
+
+  if (filtroActivo) {
+
+    totalPrincipal = registrosIndicadores.reduce(
+      (suma, r) => suma + Number(r.bandejas || 0),
+      0
+    );
+
+    document.getElementById("tituloTotal").textContent =
+      "BANDEJAS EN EL PERIODO";
+
+    document.getElementById("subtituloTotal").textContent =
+      "Producción dentro del rango seleccionado";
+
+  } else {
+
+    const registrosHoy = registrosIndicadores.filter(r =>
+      fechaLocalColombia(new Date(r.fecha_hora)) === hoy
+    );
+
+    totalPrincipal = registrosHoy.reduce(
+      (suma, r) => suma + Number(r.bandejas || 0),
+      0
+    );
+
+    document.getElementById("tituloTotal").textContent =
+      "BANDEJAS CONTABILIZADAS HOY";
+
+    document.getElementById("subtituloTotal").textContent =
+      fechaReinicio
+        ? "Producción desde el último reinicio visual"
+        : "Producción acumulada del día";
+
+  }
 
   document.getElementById("totalBandejas").textContent =
-    totalHoy.toLocaleString("es-CO");
+    totalPrincipal.toLocaleString("es-CO");
 
-  // Bandejas registradas durante los últimos 60 minutos
+
+  // Bandejas últimas 60 minutos
   const haceUnaHora = ahora.getTime() - 60 * 60 * 1000;
 
-  const registrosUltimaHora = registros.filter(r =>
-    new Date(r.fecha_hora).getTime() >= haceUnaHora &&
-    new Date(r.fecha_hora).getTime() <= ahora.getTime()
-  );
+  const registrosHora = registrosIndicadores.filter(r => {
 
-  const totalHora = registrosUltimaHora.reduce(
+    const tiempo = new Date(r.fecha_hora).getTime();
+
+    return tiempo >= haceUnaHora && tiempo <= ahora.getTime();
+
+  });
+
+  const totalHora = registrosHora.reduce(
     (suma, r) => suma + Number(r.bandejas || 0),
     0
   );
@@ -677,7 +1049,8 @@ function actualizarPanel() {
   document.getElementById("bandejasHora").textContent =
     totalHora.toLocaleString("es-CO");
 
-  // Último registro
+
+  // Último conteo real
   if (registros.length > 0) {
 
     const ultimo = registros[0];
@@ -703,31 +1076,93 @@ function actualizarPanel() {
 
   }
 
-  // Estado de producción: actividad en los últimos 15 minutos
+
+  // Estado de producción
   const haceQuinceMinutos = ahora.getTime() - 15 * 60 * 1000;
 
-  const hayActividad = registros.some(r =>
-    new Date(r.fecha_hora).getTime() >= haceQuinceMinutos &&
-    new Date(r.fecha_hora).getTime() <= ahora.getTime()
-  );
+  const hayActividad = registros.some(r => {
+
+    const tiempo = new Date(r.fecha_hora).getTime();
+
+    return tiempo >= haceQuinceMinutos &&
+           tiempo <= ahora.getTime();
+
+  });
 
   document.getElementById("estadoProduccion").textContent =
     hayActividad ? "Produciendo" : "En espera";
+
 
   // El firmware actual no transmite diagnóstico del sensor
   document.getElementById("estadoSensor").textContent =
     "Sin telemetría";
 
-  // Actualizar tabla
-  actualizarTabla();
+
+  // Mostrar información de filtros
+  actualizarResumenFiltro(registrosVista);
+
+  // Historial conserva todos los registros del rango
+  actualizarTabla(registrosVista);
+
+  // Fecha del último reinicio
+  if (fechaReinicio) {
+
+    document.getElementById("fechaReinicio").textContent =
+      "Último reinicio visual: " +
+      formatoFechaHora(fechaReinicio);
+
+  } else {
+
+    document.getElementById("fechaReinicio").textContent =
+      "No se ha realizado ningún reinicio.";
+
+  }
+
 }
 
 
 // ============================================
-// 5. MOSTRAR HISTORIAL
+// 8. RESUMEN DE FILTROS
+// ============================================
+
+function actualizarResumenFiltro(lista) {
+
+  const texto = document.getElementById("resumenFiltro");
+
+  if (filtroActivo) {
+
+    let rango = "Periodo seleccionado: ";
+
+    rango += fechaDesde
+      ? formatoFechaHora(fechaDesde)
+      : "Sin fecha inicial";
+
+    rango += " hasta ";
+
+    rango += fechaHasta
+      ? formatoFechaHora(fechaHasta)
+      : "Sin fecha final";
+
+    texto.textContent =
+      rango + " | Registros encontrados: " + lista.length;
+
+  } else {
+
+    texto.textContent =
+      "Mostrando todos los registros históricos: " +
+      lista.length;
+
+  }
+
+}
+
+
+// ============================================
+// 9. TABLA DE HISTORIAL
 // ============================================
 
 function escaparHTML(valor) {
+
   return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
     "&": "&amp;",
     "<": "&lt;",
@@ -735,24 +1170,33 @@ function escaparHTML(valor) {
     '"': "&quot;",
     "'": "&#039;"
   })[caracter]);
+
 }
 
-function actualizarTabla() {
+
+function actualizarTabla(lista) {
 
   const tabla = document.getElementById("tablaRegistros");
 
-  if (registros.length === 0) {
+  if (lista.length === 0) {
+
     tabla.innerHTML = `
       <tr>
         <td colspan="6" class="vacio">
-          No hay registros disponibles.
+          No hay registros en este periodo.
         </td>
       </tr>
     `;
+
+    document.getElementById("cantidadRegistros").textContent =
+      "Registros encontrados: 0";
+
     return;
+
   }
 
-  tabla.innerHTML = registros.slice(0, 10).map(r => `
+  tabla.innerHTML = lista.slice(0, 10).map(r => `
+
     <tr>
       <td>${formatoFecha(r.fecha_hora)}</td>
       <td>${formatoHora(r.fecha_hora)}</td>
@@ -761,63 +1205,109 @@ function actualizarTabla() {
       <td>${Number(r.bandejas || 0)}</td>
       <td>${escaparHTML(r.turno || "-")}</td>
     </tr>
+
   `).join("");
+
+  document.getElementById("cantidadRegistros").textContent =
+    "Mostrando 10 de " + lista.length + " registros disponibles.";
 
 }
 
 
 // ============================================
-// 6. DESCARGAR EXCEL
+// 10. DESCARGAR EXCEL COMPLETO
 // ============================================
 
 function descargarExcel() {
 
   if (typeof XLSX === "undefined") {
+
     alert("No fue posible cargar la herramienta de Excel.");
+
     return;
+
   }
 
-  if (registros.length === 0) {
-    alert("Todavía no hay registros para exportar.");
+  // Utilizar todos los registros del periodo seleccionado.
+  // Sin filtro: todos los registros consultados.
+
+  const registrosExportar = obtenerRegistrosFiltrados();
+
+  if (registrosExportar.length === 0) {
+
+    alert("No hay registros para exportar.");
+
     return;
+
   }
 
   const ahora = new Date();
 
-  const fechaHoy = fechaLocalColombia(ahora);
-
-  const registrosHoy = registros.filter(r =>
-    fechaLocalColombia(new Date(r.fecha_hora)) === fechaHoy
-  );
-
-  const totalHoy = registrosHoy.reduce(
+  const totalBandejas = registrosExportar.reduce(
     (suma, r) => suma + Number(r.bandejas || 0),
     0
   );
 
+  const fechaPeriodo = filtroActivo
+    ? (
+        (fechaDesde ? formatoFechaHora(fechaDesde) : "Inicio abierto") +
+        " - " +
+        (fechaHasta ? formatoFechaHora(fechaHasta) : "Final abierto")
+      )
+    : "Todo el historial disponible";
+
   const resumen = [
+
     ["RLDS-01 - RENDIMIENTO LÍNEA DE SIEMBRA"],
-    ["Fecha de descarga", formatoFecha(ahora)],
+
+    ["Fecha de descarga", formatoFechaHora(ahora)],
+
     ["Colaborador", CODIGO_COLABORADOR],
+
     ["Línea", CODIGO_LINEA],
+
     ["Dispositivo", CODIGO_DISPOSITIVO],
+
+    ["Periodo consultado", fechaPeriodo],
+
     [],
+
     ["INDICADOR", "VALOR"],
-    ["Bandejas contabilizadas hoy", totalHoy],
-    ["Registros de hoy", registrosHoy.length],
-    ["Total de registros consultados", registros.length]
+
+    ["Total bandejas", totalBandejas],
+
+    ["Total de registros", registrosExportar.length],
+
+    ["Promedio bandejas por registro",
+      registrosExportar.length
+        ? totalBandejas / registrosExportar.length
+        : 0
+    ]
+
   ];
 
-  const historial = registros.map(r => ({
+
+  // Todos los registros, no solamente los últimos 10 o 5000
+  const historial = registrosExportar.map(r => ({
+
     "Fecha": formatoFecha(r.fecha_hora),
+
     "Hora": formatoHora(r.fecha_hora),
+
     "Colaborador": CODIGO_COLABORADOR,
+
     "Línea": CODIGO_LINEA,
+
     "Dispositivo": CODIGO_DISPOSITIVO,
+
     "Bandejas": Number(r.bandejas || 0),
+
     "Turno": r.turno || "",
+
     "ID evento": r.id_evento || ""
+
   }));
+
 
   const libro = XLSX.utils.book_new();
 
@@ -825,35 +1315,49 @@ function descargarExcel() {
 
   const hojaHistorial = XLSX.utils.json_to_sheet(historial);
 
+
   hojaResumen["!cols"] = [
-    { wch: 32 },
-    { wch: 24 }
+    { wch: 38 },
+    { wch: 35 }
   ];
 
   hojaHistorial["!cols"] = [
     { wch: 15 },
+    { wch: 18 },
+    { wch: 18 },
     { wch: 15 },
     { wch: 18 },
-    { wch: 14 },
-    { wch: 18 },
     { wch: 12 },
     { wch: 12 },
-    { wch: 35 }
+    { wch: 38 }
   ];
 
-  XLSX.utils.book_append_sheet(libro, hojaResumen, "Resumen");
-  XLSX.utils.book_append_sheet(libro, hojaHistorial, "Historial");
 
-  XLSX.writeFile(
+  XLSX.utils.book_append_sheet(
     libro,
-    "RLDS-01_Produccion_" + fechaHoy + ".xlsx"
+    hojaResumen,
+    "Resumen"
   );
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    hojaHistorial,
+    "Historial"
+  );
+
+
+  const nombreArchivo =
+    "RLDS-01_Produccion_" +
+    fechaLocalColombia(ahora) +
+    ".xlsx";
+
+  XLSX.writeFile(libro, nombreArchivo);
 
 }
 
 
 // ============================================
-// 7. INICIAR Y ACTUALIZAR AUTOMÁTICAMENTE
+// 11. INICIAR SISTEMA
 // ============================================
 
 consultarDatos();
