@@ -4,1368 +4,2036 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>RLDS-01 | Línea de Siembra</title>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- EXCEL -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <style>
+
 :root {
-  --verde: #0F6D3F;
-  --verde2: #18A558;
-  --fondo: #EAF7F0;
-  --texto: #26352D;
+    --verde: #0F6D3F;
+    --verde2: #18A558;
+    --fondo: #EAF7F0;
+    --gris: #D7D3C7;
+    --blanco: #FFFFFF;
+    --texto: #26352D;
+    --texto2: #68766E;
+    --rojo: #D9534F;
+    --amarillo: #E9A23B;
+    --borde: #E4EBE6;
 }
 
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background: #F4F7F5;
-  color: var(--texto);
-  min-height: 100vh;
-  padding: 18px 28px;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #F4F7F5;
+    color: var(--texto);
+    padding: 24px;
 }
 
-.contenedor {
-  width: 100%;
-  max-width: 1100px;
-  margin: auto;
+.container {
+    max-width: 1400px;
+    margin: auto;
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
+/* ENCABEZADO */
+
+.header {
+    background: var(--verde);
+    color: white;
+    padding: 25px 30px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
 }
 
-.marca h1 {
-  color: var(--verde);
-  font-size: 24px;
+.header h1 {
+    font-size: 27px;
+    margin-bottom: 7px;
 }
 
-.marca p {
-  color: #77837B;
-  font-size: 12px;
-  margin-top: 3px;
+.header p {
+    font-size: 14px;
+    opacity: 0.9;
 }
 
-.estado {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #A77A26;
-  font-weight: bold;
+.connection {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+    font-weight: bold;
 }
 
-.indicador {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #D99A30;
+.connection-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--amarillo);
 }
 
-.estado.ok {
-  color: var(--verde);
+.connection-dot.online {
+    background: #5CE39A;
 }
 
-.estado.ok .indicador {
-  background: var(--verde2);
+.connection-dot.offline {
+    background: #FF7777;
 }
 
-.estado.error {
-  color: #B42318;
+/* IDENTIFICACIÓN */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 22px;
 }
 
-.estado.error .indicador {
-  background: #D92D20;
+.info-card {
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 17px 20px;
 }
 
-.barra {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
+.info-card span {
+    display: block;
+    color: var(--texto2);
+    font-size: 12px;
+    margin-bottom: 7px;
 }
 
-.informacion {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  color: #66736B;
-  font-size: 12px;
+.info-card strong {
+    font-size: 16px;
+    color: var(--verde);
+}
+
+/* FILTROS */
+
+.section {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid var(--borde);
+    margin-bottom: 22px;
+}
+
+.section-title {
+    font-size: 17px;
+    color: var(--verde);
+    font-weight: bold;
+    margin-bottom: 18px;
+}
+
+.filters {
+    display: flex;
+    align-items: end;
+    gap: 13px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+    min-width: 190px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    color: var(--texto2);
+    font-weight: bold;
+}
+
+input[type="datetime-local"] {
+    padding: 11px;
+    border: 1px solid var(--gris);
+    border-radius: 8px;
+    font-size: 13px;
+    width: 100%;
 }
 
 button {
-  cursor: pointer;
-  font-family: inherit;
+    padding: 11px 17px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+button:hover {
+    opacity: 0.88;
+}
+
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--verde);
+    color: white;
+}
+
+.btn-secondary {
+    background: #E8F3EC;
+    color: var(--verde);
+}
+
+.btn-danger {
+    background: #FCEDEC;
+    color: #B93C36;
 }
 
 .btn-excel {
-  background: var(--verde);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 15px;
-  font-size: 12px;
-  font-weight: bold;
+    background: var(--verde2);
+    color: white;
 }
 
-.btn-excel:hover {
-  background: var(--verde2);
+/* INDICADORES */
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 17px;
+    margin-bottom: 22px;
 }
 
-.btn-excel:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.metric-card {
+    background: white;
+    border-radius: 13px;
+    border: 1px solid var(--borde);
+    padding: 22px;
+    min-height: 135px;
 }
 
-.filtros {
-  background: white;
-  border: 1px solid #E5EBE7;
-  border-radius: 12px;
-  padding: 17px 20px;
-  margin-bottom: 14px;
+.metric-card .label {
+    color: var(--texto2);
+    font-size: 13px;
+    margin-bottom: 14px;
 }
 
-.filtros h3 {
-  color: var(--verde);
-  font-size: 14px;
-  margin-bottom: 13px;
+.metric-card .value {
+    font-size: 31px;
+    color: var(--verde);
+    font-weight: bold;
 }
 
-.campos-filtro {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
-  align-items: end;
-  gap: 12px;
+.metric-card .description {
+    font-size: 12px;
+    color: var(--texto2);
+    margin-top: 9px;
 }
 
-.campo label {
-  display: block;
-  font-size: 11px;
-  color: #758078;
-  margin-bottom: 6px;
+/* ESTADOS */
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 17px;
+    margin-bottom: 22px;
 }
 
-.campo input {
-  width: 100%;
-  min-width: 0;
-  padding: 9px;
-  border: 1px solid #D7E0DA;
-  border-radius: 7px;
-  color: var(--texto);
-  font-size: 12px;
+.status-card {
+    background: white;
+    border-radius: 13px;
+    padding: 20px;
+    border: 1px solid var(--borde);
 }
 
-.btn-consultar,
-.btn-limpiar,
-.btn-reset {
-  border: none;
-  border-radius: 7px;
-  padding: 10px 13px;
-  font-size: 12px;
-  font-weight: bold;
+.status-card h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
 }
 
-.btn-consultar {
-  background: var(--verde);
-  color: white;
+.status-text {
+    color: var(--texto2);
+    font-size: 14px;
 }
 
-.btn-limpiar {
-  background: #EAF7F0;
-  color: var(--verde);
+.status-active {
+    color: var(--verde2);
+    font-weight: bold;
 }
 
-.btn-reset {
-  background: #FCEEEE;
-  color: #B42318;
-  border: 1px solid #F3D0D0;
+.status-inactive {
+    color: var(--rojo);
+    font-weight: bold;
 }
 
-.btn-reset:hover {
-  background: #F9DEDE;
-}
+/* TABLA */
 
-.resumen-filtro {
-  font-size: 11px;
-  color: #758078;
-  margin-top: 12px;
-}
-
-.panel-principal {
-  background: var(--verde);
-  color: white;
-  border-radius: 14px;
-  padding: 22px 26px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.panel-principal p {
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-.total {
-  font-size: 52px;
-  font-weight: bold;
-  margin-top: 5px;
-}
-
-.subtitulo {
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.etiqueta {
-  background: rgba(255,255,255,0.13);
-  padding: 9px 13px;
-  border-radius: 8px;
-  font-size: 12px;
-}
-
-.indicadores {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-
-.tarjeta {
-  background: white;
-  border: 1px solid #E5EBE7;
-  border-radius: 12px;
-  padding: 17px 20px;
-}
-
-.tarjeta p {
-  color: #758078;
-  font-size: 12px;
-  margin-bottom: 9px;
-}
-
-.tarjeta h2 {
-  color: var(--verde);
-  font-size: 26px;
-}
-
-.dispositivo,
-.historial {
-  background: white;
-  border: 1px solid #E5EBE7;
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin-bottom: 14px;
-}
-
-.dispositivo h3,
-.historial h3 {
-  font-size: 14px;
-  color: var(--verde);
-  margin-bottom: 12px;
-}
-
-.estados {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.fila {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  padding: 5px 0;
-}
-
-.estado-sensor {
-  color: #A77A26;
-  font-weight: bold;
-  text-align: right;
-}
-
-.estado-sensor.ok {
-  color: var(--verde);
-}
-
-.tabla-contenedor {
-  width: 100%;
-  overflow-x: auto;
+.table-container {
+    overflow-x: auto;
+    width: 100%;
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  min-width: 520px;
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
 }
 
 th {
-  text-align: left;
-  color: #66736B;
-  background: #F4F7F5;
-  padding: 10px;
+    background: #EAF7F0;
+    color: var(--verde);
+    font-size: 12px;
+    text-align: left;
+    padding: 13px;
+    white-space: nowrap;
 }
 
 td {
-  padding: 10px;
-  border-bottom: 1px solid #EDF0EE;
+    padding: 13px;
+    border-bottom: 1px solid var(--borde);
+    font-size: 13px;
+    white-space: nowrap;
 }
 
-.vacio {
-  text-align: center;
-  color: #929B95;
-  padding: 18px;
+tr:hover td {
+    background: #F8FBF9;
 }
 
-.mensaje {
-  display: none;
-  background: #FDECEC;
-  border: 1px solid #F5C2C0;
-  color: #A12622;
-  border-radius: 8px;
-  padding: 10px 12px;
-  margin-bottom: 14px;
-  font-size: 12px;
+.empty {
+    text-align: center;
+    color: var(--texto2);
+    padding: 30px;
 }
 
-.actualizacion {
-  font-size: 10px;
-  color: #929B95;
-  margin-top: 10px;
-  text-align: right;
-}
-
-footer {
-  text-align: center;
-  margin-top: 16px;
-  color: #929B95;
-  font-size: 10px;
-}
-
-@media (max-width: 800px) {
-  .campos-filtro {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 650px) {
-  body {
-    padding: 14px;
-  }
-
-  header {
-    margin-bottom: 15px;
-  }
-
-  .barra {
-    align-items: flex-start;
+.table-footer {
+    display: flex;
+    justify-content: space-between;
     gap: 12px;
-  }
-
-  .informacion {
-    gap: 8px 12px;
-  }
-
-  .panel-principal {
-    padding: 18px;
-  }
-
-  .total {
-    font-size: 42px;
-  }
-
-  .etiqueta {
-    display: none;
-  }
-
-  .indicadores {
-    grid-template-columns: 1fr 1fr;
-    gap: 9px;
-  }
-
-  .tarjeta {
-    padding: 14px;
-  }
-
-  .tarjeta h2 {
-    font-size: 23px;
-  }
-
-  .estados {
-    grid-template-columns: 1fr;
-    gap: 3px;
-  }
+    flex-wrap: wrap;
+    margin-top: 15px;
+    color: var(--texto2);
+    font-size: 12px;
 }
 
-@media (max-width: 420px) {
-  .barra {
-    flex-direction: column;
-  }
+/* EXPORTACIÓN */
 
-  .btn-excel {
-    width: 100%;
-  }
-
-  .campos-filtro {
-    grid-template-columns: 1fr;
-  }
-
-  .campos-filtro button {
-    width: 100%;
-  }
+.export-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
+
+.export-description {
+    color: var(--texto2);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* FOOTER */
+
+.footer {
+    text-align: center;
+    padding: 25px;
+    color: var(--texto2);
+    font-size: 12px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+
+    .metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 12px;
+    }
+
+    .header {
+        padding: 22px;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .metrics {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .metric-card {
+        padding: 15px;
+        min-height: 115px;
+    }
+
+    .metric-card .value {
+        font-size: 24px;
+    }
+
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters button {
+        width: 100%;
+    }
+
+}
+
 </style>
 </head>
 
 <body>
-<div class="contenedor">
 
-<header>
-  <div class="marca">
-    <h1>RLDS-01</h1>
-    <p>Rendimiento Línea de Siembra</p>
-  </div>
+<div class="container">
 
-  <div class="estado" id="estadoConexion">
-    <span class="indicador"></span>
-    <span id="textoConexion">Conectando...</span>
-  </div>
-</header>
+    <!-- ENCABEZADO -->
 
-<div class="barra">
-  <div class="informacion">
-    <span>Colaborador: 001</span>
-    <span>Línea: 01</span>
-    <span>Dispositivo: RLDS-01</span>
-  </div>
+    <header class="header">
 
-  <button class="btn-excel" id="btnExcel"
-    onclick="descargarExcel()" disabled>
-    ↓ Descargar Excel
-  </button>
+        <div>
+            <h1>RLDS-01 | Línea de Siembra</h1>
+            <p>Sistema de medición de rendimiento operativo</p>
+        </div>
+
+        <div class="connection">
+            <span id="connectionDot" class="connection-dot"></span>
+            <span id="connectionText">Conectando...</span>
+        </div>
+
+    </header>
+
+
+    <!-- IDENTIFICACIÓN -->
+
+    <section class="info-grid">
+
+        <div class="info-card">
+            <span>COLABORADOR</span>
+            <strong id="infoColaborador">Colaborador 001</strong>
+        </div>
+
+        <div class="info-card">
+            <span>LÍNEA DE PRODUCCIÓN</span>
+            <strong id="infoLinea">Línea 01</strong>
+        </div>
+
+        <div class="info-card">
+            <span>DISPOSITIVO</span>
+            <strong>RLDS-01</strong>
+        </div>
+
+    </section>
+
+
+    <!-- FILTROS -->
+
+    <section class="section">
+
+        <div class="section-title">
+            Consulta de producción
+        </div>
+
+        <div class="filters">
+
+            <div class="filter-group">
+                <label for="fechaInicio">Fecha y hora inicial</label>
+                <input type="datetime-local" id="fechaInicio">
+            </div>
+
+            <div class="filter-group">
+                <label for="fechaFin">Fecha y hora final</label>
+                <input type="datetime-local" id="fechaFin">
+            </div>
+
+            <button class="btn-primary" onclick="consultarPeriodo()">
+                Consultar
+            </button>
+
+            <button class="btn-secondary" onclick="limpiarFiltros()">
+                Limpiar filtros
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- INDICADORES -->
+
+    <section class="metrics">
+
+        <div class="metric-card">
+
+            <div class="label">Bandejas contabilizadas</div>
+
+            <div class="value" id="totalBandejas">0</div>
+
+            <div class="description" id="descripcionTotal">
+                Producción de hoy
+            </div>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <div class="label">Bandejas / hora</div>
+
+            <div class="value" id="bandejasHora">0</div>
+
+            <div class="description">
+                Últimos 60 minutos
+            </div>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <div class="label">Último conteo</div>
+
+            <div class="value" id="ultimoConteo" style="font-size:21px">
+                --
+            </div>
+
+            <div class="description" id="horaUltimoConteo">
+                Sin registros
+            </div>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <div class="label">Registros consultados</div>
+
+            <div class="value" id="totalRegistros">0</div>
+
+            <div class="description">
+                Registros en el periodo
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ESTADOS -->
+
+    <section class="status-grid">
+
+        <div class="status-card">
+
+            <h3>Estado del dispositivo ESP32</h3>
+
+            <div class="status-text" id="estadoESP32">
+                Consultando conexión...
+            </div>
+
+        </div>
+
+
+        <div class="status-card">
+
+            <h3>Estado de producción</h3>
+
+            <div class="status-text" id="estadoProduccion">
+                Sin información
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- HISTORIAL -->
+
+    <section class="section">
+
+        <div class="export-row" style="margin-bottom:18px">
+
+            <div class="section-title" style="margin-bottom:0">
+                Historial de producción
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+
+                <button class="btn-danger" onclick="reiniciarConteo()">
+                    Reiniciar indicadores
+                </button>
+
+                <button
+                    class="btn-excel"
+                    id="btnExcel"
+                    onclick="descargarExcel()">
+                    ↓ Descargar Excel
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Bandejas</th>
+                        <th>Turno</th>
+                        <th>Tiempo entre registros</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="tablaHistorial">
+
+                    <tr>
+                        <td colspan="5" class="empty">
+                            Esperando información...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="table-footer">
+
+            <span id="estadoActualizacion">
+                Última actualización: --
+            </span>
+
+            <span id="cantidadHistorial">
+                Mostrando 0 registros
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- INFORMACIÓN EXCEL -->
+
+    <section class="section">
+
+        <div class="section-title">
+            Reporte de producción
+        </div>
+
+        <div class="export-description">
+
+            El archivo Excel consulta directamente los registros disponibles
+            en Supabase para el dispositivo RLDS-01.
+
+            <br><br>
+
+            Incluye el historial completo dentro del periodo seleccionado,
+            información de recepción en la base de datos y cálculo del tiempo
+            transcurrido entre bandejas consecutivas.
+
+        </div>
+
+    </section>
+
+
+    <footer class="footer">
+        Flores El Capiro | Sistema RLDS-01 | Rendimiento Línea de Siembra
+    </footer>
+
 </div>
 
-<div class="mensaje" id="mensajeError"></div>
-
-<!-- FILTROS DE FECHA Y HORA -->
-
-<section class="filtros">
-  <h3>Consultar producción por fecha y hora</h3>
-
-  <div class="campos-filtro">
-
-    <div class="campo">
-      <label for="fechaInicio">Desde</label>
-      <input type="datetime-local" id="fechaInicio">
-    </div>
-
-    <div class="campo">
-      <label for="fechaFin">Hasta</label>
-      <input type="datetime-local" id="fechaFin">
-    </div>
-
-    <button class="btn-consultar" onclick="aplicarFiltros()">
-      Consultar
-    </button>
-
-    <button class="btn-limpiar" onclick="limpiarFiltros()">
-      Limpiar
-    </button>
-
-  </div>
-
-  <div class="resumen-filtro" id="resumenFiltro">
-    Mostrando todos los registros históricos.
-  </div>
-</section>
-
-<!-- PRODUCCIÓN PRINCIPAL -->
-
-<section class="panel-principal">
-  <div>
-    <p id="tituloTotal">BANDEJAS CONTABILIZADAS HOY</p>
-    <div class="total" id="totalBandejas">--</div>
-    <span class="subtitulo" id="subtituloTotal">
-      Producción acumulada del día
-    </span>
-  </div>
-
-  <div class="etiqueta">Línea de siembra 01</div>
-</section>
-
-<section class="indicadores">
-
-  <div class="tarjeta">
-    <p>Bandejas últimas 60 min</p>
-    <h2 id="bandejasHora">--</h2>
-  </div>
-
-  <div class="tarjeta">
-    <p>Último conteo</p>
-    <h2 id="ultimoConteo">--:--</h2>
-  </div>
-
-  <div class="tarjeta">
-    <p>Estado de producción</p>
-    <h2 id="estadoProduccion" style="font-size:18px">
-      Consultando...
-    </h2>
-  </div>
-
-</section>
-
-<!-- REINICIO VISUAL -->
-
-<section class="dispositivo">
-  <h3>Control del conteo</h3>
-
-  <div class="fila">
-    <span>Reiniciar acumulado visual</span>
-    <button class="btn-reset" onclick="reiniciarConteo()">
-      ↻ Reiniciar conteo
-    </button>
-  </div>
-
-  <div class="actualizacion" id="fechaReinicio">
-    No se ha realizado ningún reinicio.
-  </div>
-</section>
-
-<!-- ESTADO DISPOSITIVO -->
-
-<section class="dispositivo">
-  <h3>Estado del dispositivo</h3>
-
-  <div class="estados">
-    <div class="fila">
-      <span>Último envío ESP32</span>
-      <span class="estado-sensor" id="estadoESP32">
-        Consultando...
-      </span>
-    </div>
-
-    <div class="fila">
-      <span>Sensor HC-SR04</span>
-      <span class="estado-sensor" id="estadoSensor">
-        Sin telemetría
-      </span>
-    </div>
-  </div>
-</section>
-
-<!-- HISTORIAL -->
-
-<section class="historial">
-  <h3>Últimos registros de producción</h3>
-
-  <div class="tabla-contenedor">
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Hora</th>
-          <th>Colaborador</th>
-          <th>Línea</th>
-          <th>Bandejas</th>
-          <th>Turno</th>
-        </tr>
-      </thead>
-
-      <tbody id="tablaRegistros">
-        <tr>
-          <td colspan="6" class="vacio">
-            Esperando información...
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="actualizacion" id="cantidadRegistros">
-    Registros: 0
-  </div>
-
-  <div class="actualizacion" id="ultimaActualizacion">
-    Esperando primera consulta...
-  </div>
-</section>
-
-<footer>
-  FLORES EL CAPIRO · SISTEMA DE MEDICIÓN RLDS-01
-</footer>
-
-</div>
 
 <script>
 
-// ============================================
-// 1. CONFIGURACIÓN SUPABASE
-// ============================================
+// =====================================================
+// 1. CONFIGURACIÓN
+// =====================================================
 
 const SUPABASE_URL =
-"https://bulketzxhvtwlekdnhwc.supabase.co";
+    "https://bulketzxhvtwlekdnhwc.supabase.co";
 
 const SUPABASE_PUBLIC_KEY =
-"sb_publishable_i9vBE9oOj3i093C8iXlXyg_0z-NOGIw";
-
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLIC_KEY
-);
+    "sb_publishable_i9vBE9oOj3i093C8iXlXyg_0z-NOGIw";
 
 const CODIGO_DISPOSITIVO = "RLDS-01";
 const CODIGO_COLABORADOR = "COL-001";
 const CODIGO_LINEA = "LINEA-01";
 
-const INTERVALO_ACTUALIZACION = 10000;
 const TAMANO_PAGINA = 1000;
 
-let registros = [];
-let dispositivo = null;
-let cargando = false;
+const CLAVE_REINICIO =
+    "rlds01_fecha_reinicio";
 
-let filtroActivo = false;
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLIC_KEY
+);
+
+
+// =====================================================
+// 2. VARIABLES GLOBALES
+// =====================================================
+
+let dispositivo = null;
+
+let registros = [];
+
+let colaboradores = [];
+let lineas = [];
+
 let fechaDesde = null;
 let fechaHasta = null;
 
-const CLAVE_REINICIO = "rlds01_fecha_reinicio";
+let filtroActivo = false;
+
+let ultimaActualizacion = null;
 
 
-// ============================================
-// 2. FECHAS Y HORAS
-// ============================================
-
-function fechaLocalColombia(fecha) {
-
-  const partes = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Bogota",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(fecha);
-
-  const valores = {};
-
-  partes.forEach(p => {
-    valores[p.type] = p.value;
-  });
-
-  return `${valores.year}-${valores.month}-${valores.day}`;
-}
-
+// =====================================================
+// 3. FUNCIONES DE FECHA
+// =====================================================
 
 function formatoFecha(fecha) {
 
-  return new Intl.DateTimeFormat("es-CO", {
-    timeZone: "America/Bogota",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  }).format(new Date(fecha));
+    if (!fecha) return "";
+
+    return new Intl.DateTimeFormat("es-CO", {
+        timeZone: "America/Bogota",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    }).format(new Date(fecha));
 
 }
 
 
 function formatoHora(fecha) {
 
-  return new Intl.DateTimeFormat("es-CO", {
-    timeZone: "America/Bogota",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  }).format(new Date(fecha));
+    if (!fecha) return "";
+
+    return new Intl.DateTimeFormat("es-CO", {
+        timeZone: "America/Bogota",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+    }).format(new Date(fecha));
 
 }
 
 
 function formatoFechaHora(fecha) {
-  return formatoFecha(fecha) + " " + formatoHora(fecha);
-}
 
+    if (!fecha) return "";
 
-function tiempoTranscurrido(fecha) {
-
-  const segundos = Math.max(
-    0,
-    Math.floor((Date.now() - new Date(fecha).getTime()) / 1000)
-  );
-
-  if (segundos < 60) return `Hace ${segundos} s`;
-
-  const minutos = Math.floor(segundos / 60);
-
-  if (minutos < 60) return `Hace ${minutos} min`;
-
-  const horas = Math.floor(minutos / 60);
-
-  if (horas < 24) return `Hace ${horas} h`;
-
-  return `Hace ${Math.floor(horas / 24)} días`;
+    return formatoFecha(fecha) + " " + formatoHora(fecha);
 
 }
 
 
-// Convierte fecha local del navegador a ISO para comparar con Supabase
-function convertirFechaISO(valor) {
+function fechaLocalColombia(fecha) {
 
-  if (!valor) return null;
+    const partes = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Bogota",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).formatToParts(fecha);
 
-  const fecha = new Date(valor);
+    const valores = {};
 
-  if (isNaN(fecha.getTime())) return null;
+    partes.forEach(p => {
+        valores[p.type] = p.value;
+    });
 
-  return fecha.toISOString();
+    return valores.year + "-" +
+           valores.month + "-" +
+           valores.day;
 
 }
 
 
-// ============================================
-// 3. CONSULTAR TODOS LOS REGISTROS
-// ============================================
+function formatoDuracion(segundos) {
 
-async function consultarTodosLosRegistros(idDispositivo) {
+    if (segundos === null || segundos === undefined) {
+        return "";
+    }
 
-  let todos = [];
-  let inicio = 0;
+    const horas = Math.floor(segundos / 3600);
 
-  while (true) {
+    const minutos = Math.floor(
+        (segundos % 3600) / 60
+    );
 
-    const fin = inicio + TAMANO_PAGINA - 1;
+    const seg = segundos % 60;
+
+    return [
+        String(horas).padStart(2, "0"),
+        String(minutos).padStart(2, "0"),
+        String(seg).padStart(2, "0")
+    ].join(":");
+
+}
+
+
+// =====================================================
+// 4. CONSULTAR DISPOSITIVO
+// =====================================================
+
+async function consultarDispositivo() {
 
     const { data, error } = await supabaseClient
-      .from("registros")
-      .select(`
-        fecha_hora,
-        bandejas,
-        turno,
-        id_evento,
-        dispositivo_id,
-        colaborador_id,
-        linea_id
-      `)
-      .eq("dispositivo_id", idDispositivo)
-      .order("fecha_hora", { ascending: true })
-      .range(inicio, fin);
-
-    if (error) {
-      throw error;
-    }
-
-    const pagina = data || [];
-
-    todos = todos.concat(pagina);
-
-    if (pagina.length < TAMANO_PAGINA) {
-      break;
-    }
-
-    inicio += TAMANO_PAGINA;
-  }
-
-  return todos.reverse();
-
-}
-
-
-// ============================================
-// 4. CONSULTAR SUPABASE
-// ============================================
-
-async function consultarDatos() {
-
-  if (cargando) return;
-
-  cargando = true;
-
-  try {
-
-    const { data: datosDispositivo, error: errorDispositivo } =
-      await supabaseClient
         .from("dispositivos")
-        .select("id, codigo, ultima_conexion")
+        .select("*")
         .eq("codigo", CODIGO_DISPOSITIVO)
         .maybeSingle();
 
-    if (errorDispositivo) {
-      throw errorDispositivo;
+    if (error) {
+        throw error;
     }
 
-    if (!datosDispositivo) {
-      throw new Error("No se encontró el dispositivo RLDS-01.");
+    if (!data) {
+        throw new Error(
+            "No se encontró el dispositivo RLDS-01."
+        );
     }
 
-    dispositivo = datosDispositivo;
+    dispositivo = data;
 
-    registros = await consultarTodosLosRegistros(dispositivo.id);
-
-    actualizarPanel();
-
-    document.getElementById("estadoConexion").className = "estado ok";
-
-    document.getElementById("textoConexion").textContent =
-      "Datos actualizados";
-
-    document.getElementById("mensajeError").style.display = "none";
-
-    document.getElementById("btnExcel").disabled =
-      registros.length === 0;
-
-    document.getElementById("ultimaActualizacion").textContent =
-      "Última consulta: " + formatoHora(new Date());
-
-  } catch (error) {
-
-    console.error("Error consultando Supabase:", error);
-
-    document.getElementById("estadoConexion").className = "estado error";
-
-    document.getElementById("textoConexion").textContent =
-      "Error de consulta";
-
-    document.getElementById("mensajeError").textContent =
-      "No fue posible consultar Supabase: " +
-      (error.message || "Error desconocido");
-
-    document.getElementById("mensajeError").style.display = "block";
-
-  } finally {
-
-    cargando = false;
-
-  }
+    return data;
 
 }
 
 
-// ============================================
-// 5. FILTRAR REGISTROS
-// ============================================
+// =====================================================
+// 5. CONSULTAR TODOS LOS REGISTROS
+// =====================================================
+
+async function consultarTodosLosRegistros(idDispositivo) {
+
+    let todos = [];
+
+    let inicio = 0;
+
+    while (true) {
+
+        const fin = inicio + TAMANO_PAGINA - 1;
+
+        const { data, error } = await supabaseClient
+            .from("registros")
+            .select("*")
+            .eq("dispositivo_id", idDispositivo)
+            .order("fecha_hora", { ascending: true })
+            .order("id", { ascending: true })
+            .range(inicio, fin);
+
+        if (error) {
+            throw error;
+        }
+
+        const pagina = data || [];
+
+        todos = todos.concat(pagina);
+
+        if (pagina.length < TAMANO_PAGINA) {
+            break;
+        }
+
+        inicio += TAMANO_PAGINA;
+
+    }
+
+    return todos;
+
+}
+
+
+// =====================================================
+// 6. CONSULTAR INFORMACIÓN RELACIONADA
+// =====================================================
+
+async function consultarInformacionRelacionada() {
+
+    const [respuestaColaboradores, respuestaLineas] =
+        await Promise.all([
+
+            supabaseClient
+                .from("colaboradores")
+                .select("*"),
+
+            supabaseClient
+                .from("lineas")
+                .select("*")
+
+        ]);
+
+    if (respuestaColaboradores.error) {
+        throw respuestaColaboradores.error;
+    }
+
+    if (respuestaLineas.error) {
+        throw respuestaLineas.error;
+    }
+
+    colaboradores = respuestaColaboradores.data || [];
+    lineas = respuestaLineas.data || [];
+
+}
+
+
+// =====================================================
+// 7. NOMBRES DEL COLABORADOR Y LÍNEA
+// =====================================================
+
+function obtenerNombreColaborador(id) {
+
+    const encontrado = colaboradores.find(
+        c => c.id === id
+    );
+
+    return encontrado
+        ? encontrado.nombre
+        : CODIGO_COLABORADOR;
+
+}
+
+
+function obtenerCodigoColaborador(id) {
+
+    const encontrado = colaboradores.find(
+        c => c.id === id
+    );
+
+    return encontrado
+        ? encontrado.codigo
+        : CODIGO_COLABORADOR;
+
+}
+
+
+function obtenerNombreLinea(id) {
+
+    const encontrada = lineas.find(
+        l => l.id === id
+    );
+
+    return encontrada
+        ? encontrada.nombre
+        : CODIGO_LINEA;
+
+}
+
+
+function obtenerCodigoLinea(id) {
+
+    const encontrada = lineas.find(
+        l => l.id === id
+    );
+
+    return encontrada
+        ? encontrada.codigo
+        : CODIGO_LINEA;
+
+}
+
+
+// =====================================================
+// 8. CARGA GENERAL
+// =====================================================
+
+async function cargarDatos() {
+
+    try {
+
+        const respuestaDispositivo =
+            await consultarDispositivo();
+
+        await consultarInformacionRelacionada();
+
+        const datos = await consultarTodosLosRegistros(
+            respuestaDispositivo.id
+        );
+
+        registros = datos;
+
+        ultimaActualizacion = new Date();
+
+        actualizarPanel();
+
+        actualizarEstadoConexion();
+
+        document.getElementById(
+            "estadoActualizacion"
+        ).textContent =
+            "Última actualización: " +
+            formatoHora(ultimaActualizacion);
+
+    } catch (error) {
+
+        console.error("Error cargando datos:", error);
+
+        mostrarErrorConexion(error.message);
+
+    }
+
+}
+
+
+// =====================================================
+// 9. FILTRO DE FECHAS
+// =====================================================
 
 function obtenerRegistrosFiltrados() {
 
-  return registros.filter(r => {
+    let resultado = [...registros];
 
-    const fecha = new Date(r.fecha_hora).getTime();
+    if (filtroActivo) {
 
-    if (fechaDesde && fecha < fechaDesde.getTime()) {
-      return false;
+        resultado = resultado.filter(r => {
+
+            const fecha = new Date(
+                r.fecha_hora
+            ).getTime();
+
+            if (
+                fechaDesde &&
+                fecha < fechaDesde.getTime()
+            ) {
+                return false;
+            }
+
+            if (
+                fechaHasta &&
+                fecha > fechaHasta.getTime()
+            ) {
+                return false;
+            }
+
+            return true;
+
+        });
+
     }
 
-    if (fechaHasta && fecha > fechaHasta.getTime()) {
-      return false;
-    }
-
-    return true;
-
-  });
+    return resultado;
 
 }
 
 
-function aplicarFiltros() {
+function consultarPeriodo() {
 
-  const inicio = document.getElementById("fechaInicio").value;
-  const fin = document.getElementById("fechaFin").value;
+    const inicio = document.getElementById(
+        "fechaInicio"
+    ).value;
 
-  fechaDesde = convertirFechaISO(inicio)
-    ? new Date(convertirFechaISO(inicio))
-    : null;
+    const fin = document.getElementById(
+        "fechaFin"
+    ).value;
 
-  fechaHasta = convertirFechaISO(fin)
-    ? new Date(convertirFechaISO(fin))
-    : null;
+    if (inicio && fin) {
 
-  if (fechaDesde && fechaHasta && fechaDesde > fechaHasta) {
+        if (new Date(inicio) > new Date(fin)) {
 
-    alert("La fecha inicial no puede ser posterior a la fecha final.");
+            alert(
+                "La fecha inicial no puede ser posterior a la fecha final."
+            );
 
-    return;
-  }
+            return;
 
-  filtroActivo = Boolean(fechaDesde || fechaHasta);
+        }
 
-  actualizarPanel();
+    }
+
+    fechaDesde = inicio
+        ? new Date(inicio)
+        : null;
+
+    fechaHasta = fin
+        ? new Date(fin)
+        : null;
+
+    filtroActivo = true;
+
+    actualizarPanel();
 
 }
 
 
 function limpiarFiltros() {
 
-  document.getElementById("fechaInicio").value = "";
-  document.getElementById("fechaFin").value = "";
+    document.getElementById(
+        "fechaInicio"
+    ).value = "";
 
-  fechaDesde = null;
-  fechaHasta = null;
-  filtroActivo = false;
+    document.getElementById(
+        "fechaFin"
+    ).value = "";
 
-  actualizarPanel();
+    fechaDesde = null;
+    fechaHasta = null;
+
+    filtroActivo = false;
+
+    actualizarPanel();
 
 }
 
 
-// ============================================
-// 6. REINICIAR CONTEO VISUAL
-// ============================================
+// =====================================================
+// 10. REINICIAR INDICADORES VISUALES
+// =====================================================
 
 function reiniciarConteo() {
 
-  const confirmar = confirm(
-    "¿Deseas reiniciar el acumulado visual del RLDS-01?\n\n" +
-    "Los registros de Supabase NO se eliminarán."
-  );
+    const confirmar = confirm(
+        "¿Deseas reiniciar los indicadores visuales?\n\n" +
+        "Los registros históricos de Supabase no serán eliminados."
+    );
 
-  if (!confirmar) return;
+    if (!confirmar) {
+        return;
+    }
 
-  const ahora = new Date();
+    localStorage.setItem(
+        CLAVE_REINICIO,
+        new Date().toISOString()
+    );
 
-  localStorage.setItem(
-    CLAVE_REINICIO,
-    ahora.toISOString()
-  );
+    actualizarPanel();
 
-  // Limpiar filtros para comenzar el nuevo conteo visual
-  limpiarFiltros();
-
-  actualizarPanel();
-
-  alert(
-    "Conteo visual reiniciado correctamente.\n" +
-    "El historial de Supabase permanece intacto."
-  );
+    alert(
+        "Indicadores reiniciados correctamente.\n" +
+        "El historial permanece disponible."
+    );
 
 }
 
 
-function obtenerFechaReinicio() {
-
-  const valor = localStorage.getItem(CLAVE_REINICIO);
-
-  if (!valor) return null;
-
-  const fecha = new Date(valor);
-
-  return isNaN(fecha.getTime()) ? null : fecha;
-
-}
-
-
-// ============================================
-// 7. ACTUALIZAR INDICADORES
-// ============================================
+// =====================================================
+// 11. ACTUALIZAR PANEL
+// =====================================================
 
 function actualizarPanel() {
 
-  const ahora = new Date();
+    const filtrados = obtenerRegistrosFiltrados();
 
-  const hoy = fechaLocalColombia(ahora);
-
-  const registrosVista = obtenerRegistrosFiltrados();
-
-  const fechaReinicio = obtenerFechaReinicio();
-
-  // El reinicio visual solo afecta los indicadores,
-  // nunca elimina registros del historial.
-
-  let registrosIndicadores = registrosVista;
-
-  if (!filtroActivo && fechaReinicio) {
-
-    registrosIndicadores = registrosIndicadores.filter(r =>
-      new Date(r.fecha_hora) >= fechaReinicio
+    const reinicioGuardado = localStorage.getItem(
+        CLAVE_REINICIO
     );
 
-  }
+    const fechaReinicio = reinicioGuardado
+        ? new Date(reinicioGuardado).getTime()
+        : null;
 
-  // Total principal
-  let totalPrincipal = 0;
+    const registrosIndicadores = filtrados.filter(r => {
 
-  if (filtroActivo) {
+        if (!fechaReinicio) return true;
 
-    totalPrincipal = registrosIndicadores.reduce(
-      (suma, r) => suma + Number(r.bandejas || 0),
-      0
+        return new Date(r.fecha_hora).getTime() >=
+            fechaReinicio;
+
+    });
+
+    const ahora = Date.now();
+
+    // TOTAL DE BANDEJAS
+
+    const total = registrosIndicadores.reduce(
+        (suma, r) => suma + Number(r.bandejas || 0),
+        0
     );
 
-    document.getElementById("tituloTotal").textContent =
-      "BANDEJAS EN EL PERIODO";
+    document.getElementById(
+        "totalBandejas"
+    ).textContent = total.toLocaleString("es-CO");
 
-    document.getElementById("subtituloTotal").textContent =
-      "Producción dentro del rango seleccionado";
+    document.getElementById(
+        "descripcionTotal"
+    ).textContent = filtroActivo
+        ? "Producción del periodo desde el reinicio visual"
+        : "Producción de hoy desde el reinicio visual";
 
-  } else {
 
-    const registrosHoy = registrosIndicadores.filter(r =>
-      fechaLocalColombia(new Date(r.fecha_hora)) === hoy
+    // BANDEJAS POR HORA
+
+    const ultimaHora = registrosIndicadores.filter(r => {
+
+        const tiempo = new Date(
+            r.fecha_hora
+        ).getTime();
+
+        return ahora - tiempo <= 3600000 &&
+               tiempo <= ahora;
+
+    });
+
+    const totalHora = ultimaHora.reduce(
+        (suma, r) => suma + Number(r.bandejas || 0),
+        0
     );
 
-    totalPrincipal = registrosHoy.reduce(
-      (suma, r) => suma + Number(r.bandejas || 0),
-      0
+    document.getElementById(
+        "bandejasHora"
+    ).textContent = totalHora.toLocaleString("es-CO");
+
+
+    // ÚLTIMO CONTEO
+
+    const ultimo = registrosIndicadores.length
+        ? [...registrosIndicadores].sort(
+            (a, b) =>
+                new Date(b.fecha_hora) -
+                new Date(a.fecha_hora)
+        )[0]
+        : null;
+
+    document.getElementById(
+        "ultimoConteo"
+    ).textContent = ultimo
+        ? formatoHora(ultimo.fecha_hora)
+        : "--";
+
+    document.getElementById(
+        "horaUltimoConteo"
+    ).textContent = ultimo
+        ? formatoFecha(ultimo.fecha_hora)
+        : "Sin registros";
+
+
+    // REGISTROS DEL PERIODO
+
+    document.getElementById(
+        "totalRegistros"
+    ).textContent = filtrados.length.toLocaleString("es-CO");
+
+
+    // ESTADO DE PRODUCCIÓN
+
+    const estadoProduccion = document.getElementById(
+        "estadoProduccion"
     );
 
-    document.getElementById("tituloTotal").textContent =
-      "BANDEJAS CONTABILIZADAS HOY";
+    if (!ultimo) {
 
-    document.getElementById("subtituloTotal").textContent =
-      fechaReinicio
-        ? "Producción desde el último reinicio visual"
-        : "Producción acumulada del día";
+        estadoProduccion.textContent =
+            "Sin registros disponibles";
 
-  }
+        estadoProduccion.className =
+            "status-text status-inactive";
 
-  document.getElementById("totalBandejas").textContent =
-    totalPrincipal.toLocaleString("es-CO");
+    } else {
 
+        const diferencia =
+            ahora - new Date(ultimo.fecha_hora).getTime();
 
-  // Bandejas últimas 60 minutos
-  const haceUnaHora = ahora.getTime() - 60 * 60 * 1000;
+        if (diferencia <= 15 * 60 * 1000) {
 
-  const registrosHora = registrosIndicadores.filter(r => {
+            estadoProduccion.textContent =
+                "Producción activa";
 
-    const tiempo = new Date(r.fecha_hora).getTime();
+            estadoProduccion.className =
+                "status-text status-active";
 
-    return tiempo >= haceUnaHora && tiempo <= ahora.getTime();
+        } else {
 
-  });
+            estadoProduccion.textContent =
+                "Sin registros recientes";
 
-  const totalHora = registrosHora.reduce(
-    (suma, r) => suma + Number(r.bandejas || 0),
-    0
-  );
+            estadoProduccion.className =
+                "status-text status-inactive";
 
-  document.getElementById("bandejasHora").textContent =
-    totalHora.toLocaleString("es-CO");
+        }
 
-
-  // Último conteo real
-  if (registros.length > 0) {
-
-    const ultimo = registros[0];
-
-    document.getElementById("ultimoConteo").textContent =
-      formatoHora(ultimo.fecha_hora);
-
-    document.getElementById("estadoESP32").textContent =
-      tiempoTranscurrido(ultimo.fecha_hora);
-
-    document.getElementById("estadoESP32").className =
-      "estado-sensor ok";
-
-  } else {
-
-    document.getElementById("ultimoConteo").textContent = "--:--";
-
-    document.getElementById("estadoESP32").textContent =
-      "Sin registros";
-
-    document.getElementById("estadoESP32").className =
-      "estado-sensor";
-
-  }
+    }
 
 
-  // Estado de producción
-  const haceQuinceMinutos = ahora.getTime() - 15 * 60 * 1000;
+    // TABLA DE HISTORIAL
 
-  const hayActividad = registros.some(r => {
-
-    const tiempo = new Date(r.fecha_hora).getTime();
-
-    return tiempo >= haceQuinceMinutos &&
-           tiempo <= ahora.getTime();
-
-  });
-
-  document.getElementById("estadoProduccion").textContent =
-    hayActividad ? "Produciendo" : "En espera";
-
-
-  // El firmware actual no transmite diagnóstico del sensor
-  document.getElementById("estadoSensor").textContent =
-    "Sin telemetría";
-
-
-  // Mostrar información de filtros
-  actualizarResumenFiltro(registrosVista);
-
-  // Historial conserva todos los registros del rango
-  actualizarTabla(registrosVista);
-
-  // Fecha del último reinicio
-  if (fechaReinicio) {
-
-    document.getElementById("fechaReinicio").textContent =
-      "Último reinicio visual: " +
-      formatoFechaHora(fechaReinicio);
-
-  } else {
-
-    document.getElementById("fechaReinicio").textContent =
-      "No se ha realizado ningún reinicio.";
-
-  }
+    actualizarTabla(filtrados);
 
 }
 
 
-// ============================================
-// 8. RESUMEN DE FILTROS
-// ============================================
+// =====================================================
+// 12. TABLA DE HISTORIAL
+// =====================================================
 
-function actualizarResumenFiltro(lista) {
+function actualizarTabla(datos) {
 
-  const texto = document.getElementById("resumenFiltro");
+    const tabla = document.getElementById(
+        "tablaHistorial"
+    );
 
-  if (filtroActivo) {
+    const ordenados = [...datos].sort(
+        (a, b) =>
+            new Date(b.fecha_hora) -
+            new Date(a.fecha_hora)
+    );
 
-    let rango = "Periodo seleccionado: ";
+    const ultimos = ordenados.slice(0, 10);
 
-    rango += fechaDesde
-      ? formatoFechaHora(fechaDesde)
-      : "Sin fecha inicial";
+    if (ultimos.length === 0) {
 
-    rango += " hasta ";
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty">
+                    No hay registros para mostrar.
+                </td>
+            </tr>
+        `;
 
-    rango += fechaHasta
-      ? formatoFechaHora(fechaHasta)
-      : "Sin fecha final";
+        document.getElementById(
+            "cantidadHistorial"
+        ).textContent = "Mostrando 0 registros";
 
-    texto.textContent =
-      rango + " | Registros encontrados: " + lista.length;
+        return;
 
-  } else {
+    }
 
-    texto.textContent =
-      "Mostrando todos los registros históricos: " +
-      lista.length;
+    // Calcular intervalos utilizando todo el historial,
+    // antes de aplicar el filtro de visualización.
 
-  }
+    const cronologicos = [...registros].sort(
+        (a, b) =>
+            new Date(a.fecha_hora) -
+            new Date(b.fecha_hora)
+    );
+
+    const intervalos = new Map();
+
+    let anterior = null;
+
+    cronologicos.forEach(r => {
+
+        const actual = new Date(r.fecha_hora).getTime();
+
+        const clave = r.id || r.id_evento;
+
+        let segundos = null;
+
+        if (anterior !== null) {
+
+            segundos = Math.max(
+                0,
+                Math.round((actual - anterior) / 1000)
+            );
+
+        }
+
+        intervalos.set(clave, segundos);
+
+        anterior = actual;
+
+    });
+
+    tabla.innerHTML = ultimos.map(r => {
+
+        const clave = r.id || r.id_evento;
+
+        const segundos = intervalos.get(clave);
+
+        const intervalo = segundos === null ||
+                          segundos === undefined
+            ? "--"
+            : formatoDuracion(segundos);
+
+        return `
+            <tr>
+                <td>${formatoFecha(r.fecha_hora)}</td>
+                <td>${formatoHora(r.fecha_hora)}</td>
+                <td><strong>${Number(r.bandejas || 0)}</strong></td>
+                <td>${r.turno || "--"}</td>
+                <td>${intervalo}</td>
+            </tr>
+        `;
+
+    }).join("");
+
+    document.getElementById(
+        "cantidadHistorial"
+    ).textContent =
+        "Mostrando " + ultimos.length +
+        " de " + datos.length + " registros";
 
 }
 
 
-// ============================================
-// 9. TABLA DE HISTORIAL
-// ============================================
+// =====================================================
+// 13. ESTADO DE CONEXIÓN
+// =====================================================
 
-function escaparHTML(valor) {
+function actualizarEstadoConexion() {
 
-  return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[caracter]);
+    const dot = document.getElementById(
+        "connectionDot"
+    );
+
+    const texto = document.getElementById(
+        "connectionText"
+    );
+
+    const estado = document.getElementById(
+        "estadoESP32"
+    );
+
+    if (!dispositivo) {
+
+        dot.className = "connection-dot offline";
+
+        texto.textContent = "Sin conexión";
+
+        estado.textContent =
+            "No se encontró el dispositivo.";
+
+        return;
+
+    }
+
+    const ultima = dispositivo.ultima_conexion
+        ? new Date(dispositivo.ultima_conexion)
+        : null;
+
+    const diferencia = ultima
+        ? Date.now() - ultima.getTime()
+        : Infinity;
+
+    if (dispositivo.activo && diferencia <= 2 * 60 * 1000) {
+
+        dot.className = "connection-dot online";
+
+        texto.textContent = "Dispositivo conectado";
+
+        estado.innerHTML =
+            '<span class="status-active">Conectado</span>' +
+            '<br><br>Última conexión: ' +
+            formatoFechaHora(ultima);
+
+    } else {
+
+        dot.className = "connection-dot offline";
+
+        texto.textContent = "Dispositivo desconectado";
+
+        estado.innerHTML =
+            '<span class="status-inactive">Sin conexión reciente</span>' +
+            (ultima
+                ? '<br><br>Última conexión: ' +
+                  formatoFechaHora(ultima)
+                : '');
+
+    }
 
 }
 
 
-function actualizarTabla(lista) {
+function mostrarErrorConexion(mensaje) {
 
-  const tabla = document.getElementById("tablaRegistros");
+    document.getElementById(
+        "connectionDot"
+    ).className = "connection-dot offline";
 
-  if (lista.length === 0) {
+    document.getElementById(
+        "connectionText"
+    ).textContent = "Error de conexión";
 
-    tabla.innerHTML = `
-      <tr>
-        <td colspan="6" class="vacio">
-          No hay registros en este periodo.
-        </td>
-      </tr>
-    `;
+    document.getElementById(
+        "estadoESP32"
+    ).innerHTML =
+        '<span class="status-inactive">' +
+        "No fue posible consultar Supabase." +
+        "</span>";
 
-    document.getElementById("cantidadRegistros").textContent =
-      "Registros encontrados: 0";
-
-    return;
-
-  }
-
-  tabla.innerHTML = lista.slice(0, 10).map(r => `
-
-    <tr>
-      <td>${formatoFecha(r.fecha_hora)}</td>
-      <td>${formatoHora(r.fecha_hora)}</td>
-      <td>${CODIGO_COLABORADOR}</td>
-      <td>${CODIGO_LINEA}</td>
-      <td>${Number(r.bandejas || 0)}</td>
-      <td>${escaparHTML(r.turno || "-")}</td>
-    </tr>
-
-  `).join("");
-
-  document.getElementById("cantidadRegistros").textContent =
-    "Mostrando 10 de " + lista.length + " registros disponibles.";
+    console.error(mensaje);
 
 }
 
 
-// ============================================
-// 10. DESCARGAR EXCEL COMPLETO
-// ============================================
+// =====================================================
+// 14. EXPORTAR EXCEL DIRECTAMENTE DESDE SUPABASE
+// =====================================================
 
-function descargarExcel() {
+async function descargarExcel() {
 
-  if (typeof XLSX === "undefined") {
+    const boton = document.getElementById(
+        "btnExcel"
+    );
 
-    alert("No fue posible cargar la herramienta de Excel.");
+    const textoOriginal = boton.textContent;
 
-    return;
+    try {
 
-  }
+        if (typeof XLSX === "undefined") {
 
-  // Utilizar todos los registros del periodo seleccionado.
-  // Sin filtro: todos los registros consultados.
+            alert(
+                "No fue posible cargar la herramienta de Excel."
+            );
 
-  const registrosExportar = obtenerRegistrosFiltrados();
+            return;
 
-  if (registrosExportar.length === 0) {
+        }
 
-    alert("No hay registros para exportar.");
+        boton.disabled = true;
 
-    return;
+        boton.textContent =
+            "Consultando base de datos...";
 
-  }
+        // CONSULTA NUEVA A SUPABASE
 
-  const ahora = new Date();
+        if (!dispositivo) {
 
-  const totalBandejas = registrosExportar.reduce(
-    (suma, r) => suma + Number(r.bandejas || 0),
-    0
-  );
+            await consultarDispositivo();
 
-  const fechaPeriodo = filtroActivo
-    ? (
-        (fechaDesde ? formatoFechaHora(fechaDesde) : "Inicio abierto") +
-        " - " +
-        (fechaHasta ? formatoFechaHora(fechaHasta) : "Final abierto")
-      )
-    : "Todo el historial disponible";
+        }
 
-  const resumen = [
+        await consultarInformacionRelacionada();
 
-    ["RLDS-01 - RENDIMIENTO LÍNEA DE SIEMBRA"],
+        const datosBD = await consultarTodosLosRegistros(
+            dispositivo.id
+        );
 
-    ["Fecha de descarga", formatoFechaHora(ahora)],
+        // CALCULAR INTERVALOS SOBRE TODO EL HISTORIAL
+        // ANTES DE APLICAR LOS FILTROS.
 
-    ["Colaborador", CODIGO_COLABORADOR],
+        const cronologicos = [...datosBD].sort(
+            (a, b) => {
 
-    ["Línea", CODIGO_LINEA],
+                const diferencia =
+                    new Date(a.fecha_hora) -
+                    new Date(b.fecha_hora);
 
-    ["Dispositivo", CODIGO_DISPOSITIVO],
+                if (diferencia !== 0) {
+                    return diferencia;
+                }
 
-    ["Periodo consultado", fechaPeriodo],
+                return String(a.id || "").localeCompare(
+                    String(b.id || "")
+                );
 
-    [],
+            }
+        );
 
-    ["INDICADOR", "VALOR"],
+        const historialCompleto = [];
 
-    ["Total bandejas", totalBandejas],
+        let fechaAnterior = null;
 
-    ["Total de registros", registrosExportar.length],
+        let totalIntervalos = 0;
+        let cantidadIntervalos = 0;
 
-    ["Promedio bandejas por registro",
-      registrosExportar.length
-        ? totalBandejas / registrosExportar.length
-        : 0
-    ]
+        let intervaloMinimo = null;
+        let intervaloMaximo = null;
 
-  ];
+        cronologicos.forEach(r => {
+
+            const fechaActual = new Date(
+                r.fecha_hora
+            );
+
+            let segundos = null;
+
+            if (fechaAnterior !== null) {
+
+                segundos = Math.max(
+                    0,
+                    Math.round(
+                        (fechaActual.getTime() -
+                         fechaAnterior) / 1000
+                    )
+                );
+
+                totalIntervalos += segundos;
+
+                cantidadIntervalos++;
+
+                intervaloMinimo =
+                    intervaloMinimo === null
+                    ? segundos
+                    : Math.min(intervaloMinimo, segundos);
+
+                intervaloMaximo =
+                    intervaloMaximo === null
+                    ? segundos
+                    : Math.max(intervaloMaximo, segundos);
+
+            }
+
+            historialCompleto.push({
+
+                ...r,
+
+                fecha_hora_anterior:
+                    fechaAnterior === null
+                        ? null
+                        : new Date(fechaAnterior).toISOString(),
+
+                tiempo_desde_registro_anterior_seg:
+                    segundos,
+
+                tiempo_desde_registro_anterior_hhmmss:
+                    formatoDuracion(segundos),
+
+                colaborador_codigo:
+                    obtenerCodigoColaborador(r.colaborador_id),
+
+                colaborador_nombre:
+                    obtenerNombreColaborador(r.colaborador_id),
+
+                linea_codigo:
+                    obtenerCodigoLinea(r.linea_id),
+
+                linea_nombre:
+                    obtenerNombreLinea(r.linea_id),
+
+                dispositivo_codigo:
+                    CODIGO_DISPOSITIVO
+
+            });
+
+            fechaAnterior = fechaActual.getTime();
+
+        });
 
 
-  // Todos los registros, no solamente los últimos 10 o 5000
-  const historial = registrosExportar.map(r => ({
+        // APLICAR FILTROS AL REPORTE
 
-    "Fecha": formatoFecha(r.fecha_hora),
+        const registrosExportar = historialCompleto.filter(r => {
 
-    "Hora": formatoHora(r.fecha_hora),
+            const fecha = new Date(
+                r.fecha_hora
+            ).getTime();
 
-    "Colaborador": CODIGO_COLABORADOR,
+            if (
+                fechaDesde &&
+                fecha < fechaDesde.getTime()
+            ) {
+                return false;
+            }
 
-    "Línea": CODIGO_LINEA,
+            if (
+                fechaHasta &&
+                fecha > fechaHasta.getTime()
+            ) {
+                return false;
+            }
 
-    "Dispositivo": CODIGO_DISPOSITIVO,
+            return true;
 
-    "Bandejas": Number(r.bandejas || 0),
-
-    "Turno": r.turno || "",
-
-    "ID evento": r.id_evento || ""
-
-  }));
-
-
-  const libro = XLSX.utils.book_new();
-
-  const hojaResumen = XLSX.utils.aoa_to_sheet(resumen);
-
-  const hojaHistorial = XLSX.utils.json_to_sheet(historial);
+        });
 
 
-  hojaResumen["!cols"] = [
-    { wch: 38 },
-    { wch: 35 }
-  ];
+        if (registrosExportar.length === 0) {
 
-  hojaHistorial["!cols"] = [
-    { wch: 15 },
-    { wch: 18 },
-    { wch: 18 },
-    { wch: 15 },
-    { wch: 18 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 38 }
-  ];
+            alert(
+                "No existen registros en el periodo seleccionado."
+            );
+
+            return;
+
+        }
 
 
-  XLSX.utils.book_append_sheet(
-    libro,
-    hojaResumen,
-    "Resumen"
-  );
+        // INDICADORES
 
-  XLSX.utils.book_append_sheet(
-    libro,
-    hojaHistorial,
-    "Historial"
-  );
+        const totalBandejas = registrosExportar.reduce(
+            (suma, r) =>
+                suma + Number(r.bandejas || 0),
+            0
+        );
+
+        const primeraFecha = new Date(
+            registrosExportar[0].fecha_hora
+        );
+
+        const ultimaFecha = new Date(
+            registrosExportar[
+                registrosExportar.length - 1
+            ].fecha_hora
+        );
+
+        const duracionTotal = Math.max(
+            0,
+            Math.round(
+                (ultimaFecha.getTime() -
+                 primeraFecha.getTime()) / 1000
+            )
+        );
+
+        // Promedio de intervalos correspondientes
+        // a los registros incluidos en el reporte.
+
+        const intervalosExportados =
+            registrosExportar
+                .map(r =>
+                    r.tiempo_desde_registro_anterior_seg
+                )
+                .filter(v =>
+                    v !== null &&
+                    v !== undefined
+                );
+
+        const promedioIntervalo =
+            intervalosExportados.length > 0
+            ? intervalosExportados.reduce(
+                (s, v) => s + v, 0
+              ) / intervalosExportados.length
+            : null;
+
+        const minimoExportado =
+            intervalosExportados.length > 0
+            ? Math.min(...intervalosExportados)
+            : null;
+
+        const maximoExportado =
+            intervalosExportados.length > 0
+            ? Math.max(...intervalosExportados)
+            : null;
 
 
-  const nombreArchivo =
-    "RLDS-01_Produccion_" +
-    fechaLocalColombia(ahora) +
-    ".xlsx";
+        // PERIODO
 
-  XLSX.writeFile(libro, nombreArchivo);
+        const periodo = filtroActivo
+            ? (
+                (fechaDesde
+                    ? formatoFechaHora(fechaDesde)
+                    : "Inicio abierto") +
+                " - " +
+                (fechaHasta
+                    ? formatoFechaHora(fechaHasta)
+                    : "Final abierto")
+            )
+            : "Todo el historial disponible";
+
+
+        // HOJA RESUMEN
+
+        const resumen = [
+
+            ["RLDS-01 - RENDIMIENTO LÍNEA DE SIEMBRA"],
+
+            ["Fecha de descarga",
+                formatoFechaHora(new Date())
+            ],
+
+            ["Dispositivo", CODIGO_DISPOSITIVO],
+
+            ["Colaborador", CODIGO_COLABORADOR],
+
+            ["Línea", CODIGO_LINEA],
+
+            ["Periodo consultado", periodo],
+
+            ["Total de registros", registrosExportar.length],
+
+            ["Total de bandejas", totalBandejas],
+
+            ["Primera bandeja",
+                formatoFechaHora(primeraFecha)
+            ],
+
+            ["Última bandeja",
+                formatoFechaHora(ultimaFecha)
+            ],
+
+            [],
+
+            ["ANÁLISIS DE TIEMPOS"],
+
+            ["Tiempo entre primer y último registro",
+                formatoDuracion(duracionTotal)
+            ],
+
+            ["Cantidad de intervalos",
+                intervalosExportados.length
+            ],
+
+            ["Tiempo promedio entre registros (seg)",
+                promedioIntervalo === null
+                    ? "No aplica"
+                    : Number(promedioIntervalo.toFixed(2))
+            ],
+
+            ["Tiempo promedio entre registros (hh:mm:ss)",
+                promedioIntervalo === null
+                    ? "No aplica"
+                    : formatoDuracion(
+                        Math.round(promedioIntervalo)
+                    )
+            ],
+
+            ["Intervalo mínimo (seg)",
+                minimoExportado === null
+                    ? "No aplica"
+                    : minimoExportado
+            ],
+
+            ["Intervalo máximo (seg)",
+                maximoExportado === null
+                    ? "No aplica"
+                    : maximoExportado
+            ],
+
+            [],
+
+            ["INFORMACIÓN DE LA CONSULTA"],
+
+            ["Registros consultados en Supabase",
+                datosBD.length
+            ],
+
+            ["Fuente",
+                "Base de datos Supabase - tabla registros"
+            ],
+
+            ["Cálculo de tiempos",
+                "Diferencia entre fecha_hora de registros consecutivos"
+            ]
+
+        ];
+
+
+        // HISTORIAL DETALLADO
+
+        // Se conservan todos los campos originales de Supabase
+        // y se agregan columnas de análisis.
+
+        const historialExcel = registrosExportar.map(r => {
+
+            const fecha = r.fecha_hora
+                ? new Date(r.fecha_hora)
+                : null;
+
+            const recepcion = r.recibido_en
+                ? new Date(r.recibido_en)
+                : null;
+
+            return {
+
+                "ID registro": r.id || "",
+
+                "Fecha": fecha
+                    ? formatoFecha(fecha)
+                    : "",
+
+                "Hora": fecha
+                    ? formatoHora(fecha)
+                    : "",
+
+                "Fecha y hora registro": r.fecha_hora || "",
+
+                "Fecha y hora recepción BD": r.recibido_en || "",
+
+                "Colaborador código": r.colaborador_codigo,
+
+                "Colaborador nombre": r.colaborador_nombre,
+
+                "Línea código": r.linea_codigo,
+
+                "Línea nombre": r.linea_nombre,
+
+                "Dispositivo": r.dispositivo_codigo,
+
+                "Bandejas": Number(r.bandejas || 0),
+
+                "Turno": r.turno || "",
+
+                "Fecha/hora registro anterior":
+                    r.fecha_hora_anterior || "",
+
+                "Tiempo desde registro anterior (segundos)":
+                    r.tiempo_desde_registro_anterior_seg === null
+                        ? ""
+                        : r.tiempo_desde_registro_anterior_seg,
+
+                "Tiempo desde registro anterior (HH:MM:SS)":
+                    r.tiempo_desde_registro_anterior_hhmmss,
+
+                "ID evento": r.id_evento || "",
+
+                // CAMPOS ORIGINALES DE LA BASE DE DATOS
+
+                "dispositivo_id": r.dispositivo_id || "",
+
+                "colaborador_id": r.colaborador_id || "",
+
+                "linea_id": r.linea_id || "",
+
+                "creado_en": r.creado_en || ""
+
+            };
+
+        });
+
+
+        // CREAR ARCHIVO
+
+        const libro = XLSX.utils.book_new();
+
+        const hojaResumen =
+            XLSX.utils.aoa_to_sheet(resumen);
+
+        const hojaHistorial =
+            XLSX.utils.json_to_sheet(historialExcel);
+
+        hojaResumen["!cols"] = [
+            { wch: 48 },
+            { wch: 42 }
+        ];
+
+        hojaHistorial["!cols"] = [
+            { wch: 38 },
+            { wch: 15 },
+            { wch: 15 },
+            { wch: 30 },
+            { wch: 30 },
+            { wch: 20 },
+            { wch: 25 },
+            { wch: 15 },
+            { wch: 25 },
+            { wch: 18 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 30 },
+            { wch: 32 },
+            { wch: 32 },
+            { wch: 40 },
+            { wch: 40 },
+            { wch: 40 },
+            { wch: 40 }
+        ];
+
+        hojaHistorial["!autofilter"] = {
+            ref: hojaHistorial["!ref"]
+        };
+
+        XLSX.utils.book_append_sheet(
+            libro,
+            hojaResumen,
+            "Resumen"
+        );
+
+        XLSX.utils.book_append_sheet(
+            libro,
+            hojaHistorial,
+            "Historial"
+        );
+
+
+        // DESCARGAR
+
+        const fechaArchivo = fechaLocalColombia(
+            new Date()
+        );
+
+        XLSX.writeFile(
+            libro,
+            "RLDS-01_Reporte_Completo_" +
+            fechaArchivo +
+            ".xlsx"
+        );
+
+
+        // ACTUALIZAR INFORMACIÓN DE PANTALLA
+
+        registros = datosBD;
+
+        actualizarPanel();
+
+        alert(
+            "Reporte generado correctamente.\n\n" +
+            "Registros exportados: " +
+            registrosExportar.length +
+            "\nBandejas: " +
+            totalBandejas +
+            "\nIntervalos calculados: " +
+            intervalosExportados.length
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error generando Excel:",
+            error
+        );
+
+        alert(
+            "No fue posible generar el Excel.\n\n" +
+            (error.message || "Error desconocido")
+        );
+
+    } finally {
+
+        boton.disabled = false;
+
+        boton.textContent = textoOriginal;
+
+    }
 
 }
 
 
-// ============================================
-// 11. INICIAR SISTEMA
-// ============================================
+// =====================================================
+// 15. INICIALIZACIÓN
+// =====================================================
 
-consultarDatos();
+async function iniciarSistema() {
 
-setInterval(
-  consultarDatos,
-  INTERVALO_ACTUALIZACION
-);
+    document.getElementById(
+        "infoColaborador"
+    ).textContent = CODIGO_COLABORADOR;
+
+    document.getElementById(
+        "infoLinea"
+    ).textContent = CODIGO_LINEA;
+
+    await cargarDatos();
+
+    // ACTUALIZACIÓN AUTOMÁTICA CADA 10 SEGUNDOS
+
+    setInterval(async () => {
+
+        await cargarDatos();
+
+    }, 10000);
+
+}
+
+
+// INICIAR
+
+iniciarSistema();
 
 </script>
 
