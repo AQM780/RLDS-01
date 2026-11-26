@@ -5,7 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RLDS-01 | Línea de Siembra</title>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root {
@@ -69,6 +71,22 @@ header {
   background: #D99A30;
 }
 
+.estado.ok {
+  color: var(--verde);
+}
+
+.estado.ok .indicador {
+  background: var(--verde2);
+}
+
+.estado.error {
+  color: #B42318;
+}
+
+.estado.error .indicador {
+  background: #D92D20;
+}
+
 .barra {
   display: flex;
   justify-content: space-between;
@@ -97,6 +115,11 @@ header {
 
 .btn-excel:hover {
   background: var(--verde2);
+}
+
+.btn-excel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .panel-principal {
@@ -158,14 +181,17 @@ header {
   font-size: 26px;
 }
 
-.dispositivo {
+.dispositivo,
+.historial {
   background: white;
   border: 1px solid #E5EBE7;
   border-radius: 12px;
   padding: 15px 20px;
+  margin-bottom: 14px;
 }
 
-.dispositivo h3 {
+.dispositivo h3,
+.historial h3 {
   font-size: 14px;
   color: var(--verde);
   margin-bottom: 12px;
@@ -180,6 +206,7 @@ header {
 .fila {
   display: flex;
   justify-content: space-between;
+  gap: 10px;
   font-size: 12px;
   padding: 5px 0;
 }
@@ -187,6 +214,60 @@ header {
 .estado-sensor {
   color: #A77A26;
   font-weight: bold;
+  text-align: right;
+}
+
+.estado-sensor.ok {
+  color: var(--verde);
+}
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 520px;
+}
+
+th {
+  text-align: left;
+  color: #66736B;
+  background: #F4F7F5;
+  padding: 10px;
+  font-weight: bold;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #EDF0EE;
+}
+
+.vacio {
+  text-align: center;
+  color: #929B95;
+  padding: 18px;
+}
+
+.actualizacion {
+  font-size: 10px;
+  color: #929B95;
+  margin-top: 10px;
+  text-align: right;
+}
+
+.mensaje {
+  display: none;
+  background: #FDECEC;
+  border: 1px solid #F5C2C0;
+  color: #A12622;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  font-size: 12px;
 }
 
 footer {
@@ -276,9 +357,9 @@ footer {
     <p>Rendimiento Línea de Siembra</p>
   </div>
 
-  <div class="estado">
+  <div class="estado" id="estadoConexion">
     <span class="indicador"></span>
-    <span>Esperando ESP32</span>
+    <span id="textoConexion">Conectando con Supabase...</span>
   </div>
 </header>
 
@@ -289,15 +370,17 @@ footer {
     <span>Dispositivo: RLDS-01</span>
   </div>
 
-  <button class="btn-excel" onclick="descargarExcel()">
+  <button class="btn-excel" id="btnExcel" onclick="descargarExcel()" disabled>
     ↓ Descargar Excel
   </button>
 </div>
 
+<div class="mensaje" id="mensajeError"></div>
+
 <section class="panel-principal">
   <div>
     <p>BANDEJAS CONTABILIZADAS HOY</p>
-    <div class="total" id="totalBandejas">0</div>
+    <div class="total" id="totalBandejas">--</div>
     <span class="subtitulo">Producción acumulada del día</span>
   </div>
 
@@ -308,7 +391,7 @@ footer {
 
   <div class="tarjeta">
     <p>Bandejas / hora</p>
-    <h2 id="bandejasHora">0</h2>
+    <h2 id="bandejasHora">--</h2>
   </div>
 
   <div class="tarjeta">
@@ -318,7 +401,7 @@ footer {
 
   <div class="tarjeta">
     <p>Estado de producción</p>
-    <h2 style="font-size:18px">En espera</h2>
+    <h2 id="estadoProduccion" style="font-size:18px">Consultando...</h2>
   </div>
 
 </section>
@@ -328,14 +411,42 @@ footer {
 
   <div class="estados">
     <div class="fila">
-      <span>ESP32</span>
-      <span class="estado-sensor">Sin conexión</span>
+      <span>Último envío ESP32</span>
+      <span class="estado-sensor" id="estadoESP32">Consultando...</span>
     </div>
 
     <div class="fila">
       <span>Sensor HC-SR04</span>
-      <span class="estado-sensor">Esperando</span>
+      <span class="estado-sensor" id="estadoSensor">Sin telemetría</span>
     </div>
+  </div>
+</section>
+
+<section class="historial">
+  <h3>Últimos registros de producción</h3>
+
+  <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Colaborador</th>
+          <th>Línea</th>
+          <th>Bandejas</th>
+          <th>Turno</th>
+        </tr>
+      </thead>
+      <tbody id="tablaRegistros">
+        <tr>
+          <td colspan="6" class="vacio">Esperando información...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actualizacion" id="ultimaActualizacion">
+    Esperando primera consulta...
   </div>
 </section>
 
@@ -346,48 +457,388 @@ footer {
 </div>
 
 <script>
+// ============================================
+// 1. CONFIGURACIÓN DE SUPABASE
+// ============================================
+
+const SUPABASE_URL = "https://bulketzxhvtwlekdnhwc.supabase.co";
+
+const SUPABASE_PUBLIC_KEY =
+"sb_publishable_i9vBE9oOj3i093C8iXlXyg_0z-NOGIw";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLIC_KEY
+);
+
+// Identificación del dispositivo
+const CODIGO_DISPOSITIVO = "RLDS-01";
+const CODIGO_COLABORADOR = "COL-001";
+const CODIGO_LINEA = "LINEA-01";
+
+// Configuración de actualización
+const INTERVALO_ACTUALIZACION = 10000;
+
 let registros = [];
+let dispositivo = null;
+let cargando = false;
+
+
+// ============================================
+// 2. FUNCIONES DE FECHA Y HORA
+// ============================================
+
+function fechaLocalColombia(fecha) {
+  const partes = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(fecha);
+
+  const valores = {};
+
+  partes.forEach(p => {
+    valores[p.type] = p.value;
+  });
+
+  return `${valores.year}-${valores.month}-${valores.day}`;
+}
+
+function formatoFecha(fecha) {
+  return new Intl.DateTimeFormat("es-CO", {
+    timeZone: "America/Bogota",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(new Date(fecha));
+}
+
+function formatoHora(fecha) {
+  return new Intl.DateTimeFormat("es-CO", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  }).format(new Date(fecha));
+}
+
+function tiempoTranscurrido(fecha) {
+  const segundos = Math.max(
+    0,
+    Math.floor((Date.now() - new Date(fecha).getTime()) / 1000)
+  );
+
+  if (segundos < 60) {
+    return `Hace ${segundos} s`;
+  }
+
+  const minutos = Math.floor(segundos / 60);
+
+  if (minutos < 60) {
+    return `Hace ${minutos} min`;
+  }
+
+  const horas = Math.floor(minutos / 60);
+
+  if (horas < 24) {
+    return `Hace ${horas} h`;
+  }
+
+  return `Hace ${Math.floor(horas / 24)} días`;
+}
+
+
+// ============================================
+// 3. CONSULTAR SUPABASE
+// ============================================
+
+async function consultarDatos() {
+
+  if (cargando) return;
+
+  cargando = true;
+
+  try {
+
+    // Buscar el dispositivo RLDS-01
+    const { data: datosDispositivo, error: errorDispositivo } =
+      await supabaseClient
+        .from("dispositivos")
+        .select("id, codigo, ultima_conexion")
+        .eq("codigo", CODIGO_DISPOSITIVO)
+        .maybeSingle();
+
+    if (errorDispositivo) {
+      throw errorDispositivo;
+    }
+
+    if (!datosDispositivo) {
+      throw new Error("No se encontró el dispositivo RLDS-01.");
+    }
+
+    dispositivo = datosDispositivo;
+
+    // Consultar los últimos 5000 registros del dispositivo
+    const { data, error } = await supabaseClient
+      .from("registros")
+      .select(`
+        fecha_hora,
+        bandejas,
+        turno,
+        id_evento,
+        dispositivo_id,
+        colaborador_id,
+        linea_id
+      `)
+      .eq("dispositivo_id", dispositivo.id)
+      .order("fecha_hora", { ascending: false })
+      .limit(5000);
+
+    if (error) {
+      throw error;
+    }
+
+    registros = data || [];
+
+    actualizarPanel();
+
+    document.getElementById("estadoConexion").className = "estado ok";
+    document.getElementById("textoConexion").textContent =
+      "Datos actualizados";
+
+    document.getElementById("mensajeError").style.display = "none";
+
+    document.getElementById("btnExcel").disabled =
+      registros.length === 0;
+
+    document.getElementById("ultimaActualizacion").textContent =
+      "Última consulta: " + formatoHora(new Date());
+
+  } catch (error) {
+
+    console.error("Error consultando Supabase:", error);
+
+    document.getElementById("estadoConexion").className = "estado error";
+    document.getElementById("textoConexion").textContent =
+      "Error de consulta";
+
+    document.getElementById("mensajeError").textContent =
+      "No fue posible consultar Supabase: " +
+      (error.message || "Error desconocido");
+
+    document.getElementById("mensajeError").style.display = "block";
+
+  } finally {
+
+    cargando = false;
+
+  }
+}
+
+
+// ============================================
+// 4. ACTUALIZAR INDICADORES
+// ============================================
+
+function actualizarPanel() {
+
+  const ahora = new Date();
+
+  const fechaHoy = fechaLocalColombia(ahora);
+
+  const registrosHoy = registros.filter(r =>
+    fechaLocalColombia(new Date(r.fecha_hora)) === fechaHoy
+  );
+
+  // Total de bandejas del día
+  const totalHoy = registrosHoy.reduce(
+    (suma, r) => suma + Number(r.bandejas || 0),
+    0
+  );
+
+  document.getElementById("totalBandejas").textContent =
+    totalHoy.toLocaleString("es-CO");
+
+  // Bandejas registradas durante los últimos 60 minutos
+  const haceUnaHora = ahora.getTime() - 60 * 60 * 1000;
+
+  const registrosUltimaHora = registros.filter(r =>
+    new Date(r.fecha_hora).getTime() >= haceUnaHora &&
+    new Date(r.fecha_hora).getTime() <= ahora.getTime()
+  );
+
+  const totalHora = registrosUltimaHora.reduce(
+    (suma, r) => suma + Number(r.bandejas || 0),
+    0
+  );
+
+  document.getElementById("bandejasHora").textContent =
+    totalHora.toLocaleString("es-CO");
+
+  // Último registro
+  if (registros.length > 0) {
+
+    const ultimo = registros[0];
+
+    document.getElementById("ultimoConteo").textContent =
+      formatoHora(ultimo.fecha_hora);
+
+    document.getElementById("estadoESP32").textContent =
+      tiempoTranscurrido(ultimo.fecha_hora);
+
+    document.getElementById("estadoESP32").className =
+      "estado-sensor ok";
+
+  } else {
+
+    document.getElementById("ultimoConteo").textContent = "--:--";
+
+    document.getElementById("estadoESP32").textContent =
+      "Sin registros";
+
+    document.getElementById("estadoESP32").className =
+      "estado-sensor";
+
+  }
+
+  // Estado de producción: actividad en los últimos 15 minutos
+  const haceQuinceMinutos = ahora.getTime() - 15 * 60 * 1000;
+
+  const hayActividad = registros.some(r =>
+    new Date(r.fecha_hora).getTime() >= haceQuinceMinutos &&
+    new Date(r.fecha_hora).getTime() <= ahora.getTime()
+  );
+
+  document.getElementById("estadoProduccion").textContent =
+    hayActividad ? "Produciendo" : "En espera";
+
+  // El firmware actual no transmite diagnóstico del sensor
+  document.getElementById("estadoSensor").textContent =
+    "Sin telemetría";
+
+  // Actualizar tabla
+  actualizarTabla();
+}
+
+
+// ============================================
+// 5. MOSTRAR HISTORIAL
+// ============================================
+
+function escaparHTML(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, caracter => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[caracter]);
+}
+
+function actualizarTabla() {
+
+  const tabla = document.getElementById("tablaRegistros");
+
+  if (registros.length === 0) {
+    tabla.innerHTML = `
+      <tr>
+        <td colspan="6" class="vacio">
+          No hay registros disponibles.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tabla.innerHTML = registros.slice(0, 10).map(r => `
+    <tr>
+      <td>${formatoFecha(r.fecha_hora)}</td>
+      <td>${formatoHora(r.fecha_hora)}</td>
+      <td>${CODIGO_COLABORADOR}</td>
+      <td>${CODIGO_LINEA}</td>
+      <td>${Number(r.bandejas || 0)}</td>
+      <td>${escaparHTML(r.turno || "-")}</td>
+    </tr>
+  `).join("");
+
+}
+
+
+// ============================================
+// 6. DESCARGAR EXCEL
+// ============================================
 
 function descargarExcel() {
+
   if (typeof XLSX === "undefined") {
-    alert("No fue posible cargar la herramienta de Excel. Verifica tu conexión a internet.");
+    alert("No fue posible cargar la herramienta de Excel.");
+    return;
+  }
+
+  if (registros.length === 0) {
+    alert("Todavía no hay registros para exportar.");
     return;
   }
 
   const ahora = new Date();
 
+  const fechaHoy = fechaLocalColombia(ahora);
+
+  const registrosHoy = registros.filter(r =>
+    fechaLocalColombia(new Date(r.fecha_hora)) === fechaHoy
+  );
+
+  const totalHoy = registrosHoy.reduce(
+    (suma, r) => suma + Number(r.bandejas || 0),
+    0
+  );
+
   const resumen = [
     ["RLDS-01 - RENDIMIENTO LÍNEA DE SIEMBRA"],
-    ["Fecha de descarga", ahora.toLocaleDateString("es-CO")],
-    ["Colaborador", "001"],
-    ["Línea", "01"],
-    ["Dispositivo", "RLDS-01"],
+    ["Fecha de descarga", formatoFecha(ahora)],
+    ["Colaborador", CODIGO_COLABORADOR],
+    ["Línea", CODIGO_LINEA],
+    ["Dispositivo", CODIGO_DISPOSITIVO],
     [],
     ["INDICADOR", "VALOR"],
-    ["Bandejas contabilizadas", registros.reduce((suma, r) => suma + Number(r.bandejas || 0), 0)],
-    ["Registros almacenados", registros.length]
+    ["Bandejas contabilizadas hoy", totalHoy],
+    ["Registros de hoy", registrosHoy.length],
+    ["Total de registros consultados", registros.length]
   ];
 
   const historial = registros.map(r => ({
-    "Fecha": r.fecha,
-    "Hora": r.hora,
-    "Colaborador": r.colaborador,
-    "Línea": r.linea,
-    "Dispositivo": r.dispositivo,
-    "Bandejas": r.bandejas
+    "Fecha": formatoFecha(r.fecha_hora),
+    "Hora": formatoHora(r.fecha_hora),
+    "Colaborador": CODIGO_COLABORADOR,
+    "Línea": CODIGO_LINEA,
+    "Dispositivo": CODIGO_DISPOSITIVO,
+    "Bandejas": Number(r.bandejas || 0),
+    "Turno": r.turno || "",
+    "ID evento": r.id_evento || ""
   }));
 
   const libro = XLSX.utils.book_new();
 
   const hojaResumen = XLSX.utils.aoa_to_sheet(resumen);
-  const hojaHistorial = XLSX.utils.json_to_sheet(historial, {
-    header: ["Fecha", "Hora", "Colaborador", "Línea", "Dispositivo", "Bandejas"]
-  });
 
-  hojaResumen["!cols"] = [{ wch: 32 }, { wch: 24 }];
+  const hojaHistorial = XLSX.utils.json_to_sheet(historial);
+
+  hojaResumen["!cols"] = [
+    { wch: 32 },
+    { wch: 24 }
+  ];
+
   hojaHistorial["!cols"] = [
-    { wch: 15 }, { wch: 12 }, { wch: 18 },
-    { wch: 12 }, { wch: 18 }, { wch: 14 }
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 18 },
+    { wch: 14 },
+    { wch: 18 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 35 }
   ];
 
   XLSX.utils.book_append_sheet(libro, hojaResumen, "Resumen");
@@ -395,9 +846,23 @@ function descargarExcel() {
 
   XLSX.writeFile(
     libro,
-    "RLDS-01_Produccion_" + ahora.toISOString().slice(0, 10) + ".xlsx"
+    "RLDS-01_Produccion_" + fechaHoy + ".xlsx"
   );
+
 }
+
+
+// ============================================
+// 7. INICIAR Y ACTUALIZAR AUTOMÁTICAMENTE
+// ============================================
+
+consultarDatos();
+
+setInterval(
+  consultarDatos,
+  INTERVALO_ACTUALIZACION
+);
+
 </script>
 
 </body>
